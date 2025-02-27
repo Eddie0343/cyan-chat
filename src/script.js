@@ -2,11 +2,34 @@ applyStyles("size", sizes[2]);
 
 function fadeOption(event) {
     if ($fade_bool.is(":checked")) {
-        $fade.removeClass("hidden");
-        $fade_seconds.removeClass("hidden");
+        // Show fade seconds input with a smooth transition
+        $fade.removeClass("hidden").css({
+            'opacity': 0,
+            'transform': 'translateY(-5px)'
+        }).animate({
+            'opacity': 1,
+            'transform': 'translateY(0)'
+        }, 300);
+        
+        $fade_seconds.removeClass("hidden").css({
+            'opacity': 0
+        }).animate({
+            'opacity': 1
+        }, 300);
     } else {
-        $fade.addClass("hidden");
-        $fade_seconds.addClass("hidden");
+        // Hide fade seconds with a smooth transition
+        $fade.animate({
+            'opacity': 0,
+            'transform': 'translateY(-5px)'
+        }, 300, function() {
+            $(this).addClass("hidden");
+        });
+        
+        $fade_seconds.animate({
+            'opacity': 0
+        }, 300, function() {
+            $(this).addClass("hidden");
+        });
     }
 }
 
@@ -87,6 +110,13 @@ const popup = {
 // Initialize popup when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     popup.init();
+    initializeAnimations();
+    setupFormTransition();
+    setupThemeToggle();
+    setupTooltips();
+    
+    // Initial application of styles
+    applyStyles("size", sizes[2]);
 });
 
 // Unified popup show function
@@ -183,11 +213,12 @@ function weightUpdate(event) {
 }
 
 function shadowUpdate(event) {
+    $chatLine = $("#example .chat_line");
     if ($shadow.val() == "0") {
-        $example.css("filter", "unset");
+        $chatLine.css("filter", "unset");
     } else {
         let shadow = shadows[Number($shadow.val()) - 1];
-        $example.css("filter", shadow);
+        $chatLine.css("filter", shadow);
     }
 }
 
@@ -253,6 +284,334 @@ function syncUpdate(event) {
     }
 }
 
+// function generateURL(event) {
+//     event.preventDefault();
+
+//     const baseUrl = window.location.href;
+//     const url = new URL(baseUrl);
+//     let currentUrl = url.origin + url.pathname;
+//     currentUrl = currentUrl.replace(/\/+$/, "");
+
+//     var generatedUrl = "";
+//     if ($regex.val() == "") {
+//         generatedUrl = currentUrl + "/v2/?channel=" + $channel.val();
+//     } else {
+//         generatedUrl =
+//             currentUrl +
+//             "/v2/?channel=" +
+//             $channel.val() +
+//             "&regex=" +
+//             encodeURIComponent($regex.val());
+//     }
+
+//     var selectedFont;
+//     if (fonts[Number($font.val())] == "Custom") {
+//         selectedFont = $custom_font.val();
+//     } else {
+//         selectedFont = $font.val();
+//     }
+
+//     let data = {
+//         size: $size.val(),
+//         emoteScale: $emoteScale.val(),
+//         font: selectedFont,
+//         height: $height.val(),
+//         voice: $voice.val(),
+//         stroke: $stroke.val() != "0" ? $stroke.val() : false,
+//         weight: $weight.val() != "4" ? $weight.val() : false,
+//         shadow: $shadow.val() != "0" ? $shadow.val() : false,
+//         bots: $bots.is(":checked"),
+//         hide_commands: $commands.is(":checked"),
+//         hide_badges: $badges.is(":checked"),
+//         hide_paints: $paints.is(":checked"),
+//         hide_colon: $colon.is(":checked"),
+//         animate: $animate.is(":checked"),
+//         fade: $fade_bool.is(":checked") ? $fade.val() : false,
+//         small_caps: $small_caps.is(":checked"),
+//         invert: $invert.is(":checked"),
+//         center: $center.is(":checked"),
+//         readable: $readable.is(":checked"),
+//         disable_sync: $sync.is(":checked"),
+//         disable_pruning: $pruning.is(":checked"),
+//         block: $blockedUsers.val().replace(/\s+/g, ""),
+//         yt: $ytChannel.val().replace('@', ''),
+//     };
+
+//     const params = encodeQueryData(data);
+
+//     $url.val(generatedUrl + "&" + params);
+
+//     $generator.addClass("hidden");
+//     $result.removeClass("hidden");
+// }
+
+// function copyUrl(event) {
+//     navigator.clipboard.writeText($url.val());
+
+//     $alert.css({
+//         "visibility": "visible",
+//         "opacity": "1", 
+//         "transform": "translateY(0)" 
+//     });
+    
+//     // Add animation to the alert
+//     $alert.css("animation", "justFadeIn 0.3s");
+    
+//     setTimeout(() => {
+//         showUrl();
+//     }, 2000);
+// }
+
+// function showUrl(event) {
+//     $alert.css({
+//         "opacity": "0",
+//         "transform": "translateY(-10px)"
+//     });
+    
+//     setTimeout(function () {
+//         $alert.css("visibility", "hidden");
+//     }, 300);
+// }
+
+function resetForm(event) {
+    $channel.val("");
+    $ytChannel.val("");
+    $regex.val("");
+    $blockedUsers.val("");
+    $size.val("3");
+    $emoteScale.val("1");
+    $font.val("0");
+    $height.val("4");
+    $voice.val("Brian");
+    $stroke.val("0");
+    $weight.val("4");
+    $shadow.val("0");
+    $bots.prop("checked", false);
+    $commands.prop("checked", false);
+    $badges.prop("checked", false);
+    $paints.prop("checked", false);
+    $colon.prop("checked", false);
+    $animate.prop("checked", true);
+    $fade_bool.prop("checked", false);
+    $fade.addClass("hidden");
+    $fade_seconds.addClass("hidden");
+    $fade.val("30");
+    $small_caps.prop("checked", false);
+    $invert.prop("checked", false);
+    $center.prop("checked", false);
+    $readable.prop("checked", true);
+    $sync.prop("checked", false);
+    $pruning.prop("checked", false);
+    $custom_font.prop("disabled", true);
+
+    sizeUpdate();
+    fontUpdate();
+    heightUpdate();
+    strokeUpdate();
+    weightUpdate();
+    shadowUpdate();
+    badgesUpdate();
+    paintsUpdate();
+    colonUpdate();
+    capsUpdate();
+    centerUpdate();
+
+    $result.addClass("hidden");
+    $generator.removeClass("hidden");
+    showUrl();
+}
+
+function backToForm(event) {
+    const result = document.getElementById('result');
+    const form = document.querySelector('form[name="generator"]');
+    
+    result.style.animation = 'fadeOut 0.5s forwards';
+    
+    setTimeout(() => {
+        result.classList.add('hidden');
+        form.classList.remove('hidden');
+        form.style.animation = 'fadeIn 0.5s forwards';
+        $alert.css("visibility", "hidden");
+    }, 500);
+}
+
+// Add animations and UI enhancements
+
+// Initialize UI animations
+function initializeAnimations() {
+  // Add ripple effect to buttons
+  const buttons = document.querySelectorAll('button, input[type="submit"], input[type="button"]');
+  
+  buttons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const ripple = document.createElement('span');
+      ripple.style.position = 'absolute';
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+      ripple.style.width = '0';
+      ripple.style.height = '0';
+      ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+      ripple.style.borderRadius = '50%';
+      ripple.style.transition = 'all 0.5s';
+      ripple.style.pointerEvents = 'none';
+      
+      this.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.style.width = '200px';
+        ripple.style.height = '200px';
+        ripple.style.transform = 'translate(-50%, -50%) scale(1)';
+        ripple.style.opacity = '0';
+      }, 10);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 500);
+    });
+  });
+  
+  // Add shimmer effect to form sections
+  const formSections = document.querySelectorAll('.form-section');
+  let delay = 0;
+  
+  formSections.forEach(section => {
+    section.style.animation = `fadeInDown 0.6s ease ${delay}s both`;
+    delay += 0.1;
+  });
+  
+  // Animate details elements
+  const detailsElements = document.querySelectorAll('details');
+  
+  detailsElements.forEach(details => {
+    details.addEventListener('toggle', function() {
+      const content = this.querySelector('.details-content');
+      if (this.open) {
+        content.style.animation = 'none';
+        // Trigger reflow
+        void content.offsetWidth;
+        content.style.animation = 'fadeInDown 0.3s';
+      }
+    });
+  });
+}
+
+// Nice transition when form is submitted
+function setupFormTransition() {
+  const form = document.querySelector('form[name="generator"]');
+  const result = document.getElementById('result');
+  
+  if (form && result) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Scroll to top smoothly
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      
+      // Add exit animation to form
+      form.style.animation = 'fadeOut 0.5s forwards';
+      
+      setTimeout(() => {
+        form.classList.add('hidden');
+        result.classList.remove('hidden');
+        result.style.animation = 'fadeIn 0.5s forwards';
+        
+        // Generate URL
+        generateURL(e);
+      }, 500);
+    });
+  }
+}
+
+// Toggle light/dark theme
+function setupThemeToggle() {
+  const brightnessToggle = document.getElementById('brightness');
+  const example = document.getElementById('example');
+  
+  if (brightnessToggle && example) {
+    brightnessToggle.addEventListener('click', function() {
+      example.classList.toggle('white');
+      if (example.classList.contains('white')) {
+        brightnessToggle.src = "img/dark.png";
+      } else {
+        brightnessToggle.src = "img/light.png";
+      }
+    });
+  }
+}
+
+function toggleTheme() {
+    const example = document.getElementById('example');
+    example.classList.toggle('white');
+}
+
+// Apply tooltip data attributes
+function setupTooltips() {
+  // Add tooltips to certain elements
+  document.querySelector('label[for="sync"]').closest('.form_row').setAttribute('data-tooltip', 'Keeps animated emotes in sync with each other');
+  document.querySelector('label[for="pruning"]').closest('.form_row').setAttribute('data-tooltip', 'Remove messages that scroll off-screen');
+  document.querySelector('label[for="readable"]').closest('.form_row').setAttribute('data-tooltip', 'Ensures text colors are readable');
+}
+
+// Initialize all the new UI enhancements
+document.addEventListener('DOMContentLoaded', function() {
+  popup.init();
+  initializeAnimations();
+  setupFormTransition();
+  setupThemeToggle();
+  setupTooltips();
+  
+  // Initial application of styles
+  applyStyles("size", sizes[2]);
+  
+  // Add responsive layout handling
+  adjustFormLayout();
+  window.addEventListener('resize', adjustFormLayout);
+  
+  // Ensure form elements have consistent height
+  document.querySelectorAll('select, input[type="text"]').forEach(el => {
+    el.style.height = '42px';
+  });
+});
+
+// Add layout improvement functions
+
+// Adjust form layout based on screen size
+function adjustFormLayout() {
+    const formWidth = document.querySelector('.form_table').offsetWidth;
+    const formSections = document.querySelectorAll('.form_col');
+    
+    if (formWidth < 650) {
+        formSections.forEach(section => {
+            section.style.minWidth = '100%';
+        });
+    } else {
+        formSections.forEach(section => {
+            section.style.minWidth = '320px';
+        });
+    }
+    
+    // Adjust checkbox groups based on available width
+    const checkboxGroups = document.querySelectorAll('.checkbox-group');
+    checkboxGroups.forEach(group => {
+        const parentWidth = group.parentElement.offsetWidth;
+        if (parentWidth < 500) {
+            group.style.gridTemplateColumns = '1fr';
+        } else {
+            group.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+        }
+    });
+}
+
+// Override the original generateURL function to use our new transition
+const originalGenerateURL = generateURL;
 function generateURL(event) {
     event.preventDefault();
 
@@ -309,77 +668,49 @@ function generateURL(event) {
     const params = encodeQueryData(data);
 
     $url.val(generatedUrl + "&" + params);
-
-    $generator.addClass("hidden");
-    $result.removeClass("hidden");
 }
 
+// Override backToForm with smooth transitions
+const originalBackToForm = backToForm;
+function backToForm(event) {
+    const result = document.getElementById('result');
+    const form = document.querySelector('form[name="generator"]');
+    
+    result.style.animation = 'fadeOut 0.5s forwards';
+    
+    setTimeout(() => {
+        result.classList.add('hidden');
+        form.classList.remove('hidden');
+        form.style.animation = 'fadeIn 0.5s forwards';
+        $alert.css("visibility", "hidden");
+    }, 500);
+}
+
+// Enhanced copy URL function
 function copyUrl(event) {
     navigator.clipboard.writeText($url.val());
 
-    $alert.css("visibility", "visible");
-    $alert.css("opacity", "1");
+    $alert.css({
+        "visibility": "visible",
+        "opacity": "1", 
+        // "transform": "translateY(0)" 
+    });
+    
+    // Add animation to the alert
+    $alert.css("animation", "justFadeIn 0.6s");
+    
+    setTimeout(() => {
+        showUrl();
+    }, 2000);
 }
 
+// Smooth alert hide transition
 function showUrl(event) {
-    $alert.css("opacity", "0");
-    setTimeout(function () {
-        $alert.css("visibility", "hidden");
-    }, 200);
-}
-
-function resetForm(event) {
-    $channel.val("");
-    $ytChannel.val("");
-    $regex.val("");
-    $blockedUsers.val("");
-    $size.val("3");
-    $emoteScale.val("1");
-    $font.val("0");
-    $height.val("4");
-    $voice.val("Brian");
-    $stroke.val("0");
-    $weight.val("4");
-    $shadow.val("0");
-    $bots.prop("checked", false);
-    $commands.prop("checked", false);
-    $badges.prop("checked", false);
-    $paints.prop("checked", false);
-    $colon.prop("checked", false);
-    $animate.prop("checked", true);
-    $fade_bool.prop("checked", false);
-    $fade.addClass("hidden");
-    $fade_seconds.addClass("hidden");
-    $fade.val("30");
-    $small_caps.prop("checked", false);
-    $invert.prop("checked", false);
-    $center.prop("checked", false);
-    $readable.prop("checked", true);
-    $sync.prop("checked", false);
-    $pruning.prop("checked", false);
-    $custom_font.prop("disabled", true);
-
-    sizeUpdate();
-    fontUpdate();
-    heightUpdate();
-    strokeUpdate();
-    weightUpdate();
-    shadowUpdate();
-    badgesUpdate();
-    paintsUpdate();
-    colonUpdate();
-    capsUpdate();
-    centerUpdate();
-
-    $result.addClass("hidden");
-    $generator.removeClass("hidden");
-    showUrl();
-}
-
-function backToForm(event) {
-    $result.addClass("hidden");
-    $generator.removeClass("hidden");
-    $alert.css("visibility", "hidden");
+    $alert.css({
+        "opacity": "0",
+        "visibility": "hidden",
+        "animation": "justFadeOut 0.6s"
+    });
 }
 
 const $generator = $("form[name='generator']");

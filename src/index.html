@@ -5,6 +5,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyan Chat &bull; Setup | Johnnycyan</title>
     <meta content="Cyan Chat by Johnnycyan" property="og:title" />
     <meta content="Cyan Chat is a fancy Twitch chat overlay." property="og:description" />
@@ -13,98 +14,121 @@
     <meta content="#00D9FF" data-react-helmet="true" name="theme-color" />
     <link rel="icon" type="image/webp" href="img/CyanChat128.webp" />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;400;500;700&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
     <link
         href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Indie+Flower&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Noto+Sans+JP:wght@100;300;400;500;700;900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Source+Code+Pro:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,900&family=Press+Start+2P&family=Wallpoet&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="styles/style.css?v=1" />
+    <link rel="stylesheet" href="styles/modern.css?v=1" />
     <script src="jquery.min.js"></script>
     <script src="settings.js" defer></script>
     <script src="utils.js" defer></script>
     <script src="syncEmotes.js"></script>
     <script src="styles.js"></script>
     <script src="script.js" defer></script>
+
     <style>
-        /* Popup Styling */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Additional animations for form transitions */
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form_row {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Interactive emote preview */
+        #example .emote {
+            transition: transform 0.2s ease;
+        }
+
+        #example .emote:hover {
+            transform: scale(1.1);
+        }
+
+        /* Additional layout fixes */
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
 
-        .popup-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background-color: #272727;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
-            z-index: 1001;
-            max-width: 500px;
-            width: 80%;
-            opacity: 0;
-            transition: all 0.3s ease;
-            border: 2px solid #00D9FF;
+        .form-section {
+            margin-bottom: 0;
+            /* Override margin to use gap instead */
         }
 
-        .popup-container.active {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
+        .channel-section {
+            margin-bottom: 5px;
+            width: 100%;
+            padding: 0;
         }
 
-        .popup-overlay.active {
-            opacity: 1;
-            display: block;
+        .form_row.center {
+            justify-content: center;
         }
 
-        .popup-header {
-            text-align: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 10px;
+        .form_row input[type="text"] {
+            width: 100%;
         }
 
-        .popup-header h2 {
-            margin-top: 0;
-            color: #00D9FF;
+        /* Fix the donation section */
+        .donation-content {
+            padding: 5px;
         }
 
-        .popup-content {
-            margin-bottom: 20px;
-            text-align: center;
+        /* Fix spacing for preview section */
+        #example {
+            margin: 10px 0 15px;
         }
 
-        .popup-footer {
+        /* Fix header height */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Fix select elements being cut off */
+        select option {
+            padding: 8px;
+        }
+
+        /* Make form elements more consistent */
+        .standardized-width {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Improved layout for form heading */
+        .main-section-header {
             text-align: center;
         }
 
-        .popup-close {
-            background-color: #00D9FF;
-            color: #111;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-
-        .popup-close:hover {
-            background-color: #00a5c4;
-        }
-
-        .popup-content p {
-            margin: 5px 0;
+        .main-section-header h3 {
+            color: var(--primary);
+            font-size: 20px;
+            margin: 0;
         }
     </style>
 </head>
@@ -125,293 +149,318 @@
         </div>
     </div>
 
-    <header>
-        <img src="img/CyanChat.webp" />
+    <header class="elevation-2">
+        <img src="img/CyanChat.webp" alt="Cyan Chat Logo" class="logo-pulse" />
         <div>
             <h1>Cyan Chat</h1>
-            <h2>Setup</h2>
         </div>
     </header>
 
     <section>
-        <p>
-            <em>Cyan Chat</em> is an overlay that allows you to show your Twitch
-            chat (and optionally Youtube chat) on screen with OBS, XSplit, and any other streaming software that
-            supports browser sources. It supports your
-            <a href="https://betterttv.com/" target="_blank">BetterTTV</a>,
-            <a href="https://www.frankerfacez.com/" target="_blank">FrankerFaceZ</a>
-            and <a href="https://7tv.app/" target="_blank">7TV</a> emotes, always at
-            the best available quality. You have many options to customize your
-            chat, like enabling a smooth animation for new messages, or fading old
-            ones after some time. If you have a chat full of !gamble addicts, you
-            can choose to hide bots and commands messages. It also comes with many
-            fonts and styling options that can be combined as desired. Custom fonts
-            can either be installed on your system or be the name of any Google
-            font. The "Center" style is not compatible with the animate option and
-            will always have an animation.
-        </p>
-
-        <details>
-            <summary style="text-align: center;">
-                Commands
-            </summary>
+        <div class="card elevation-2 slideUp">
             <p>
-                <em>Cyan Chat</em> comes with a few mod only commands that you
-                can use in chat.
+                <em>Cyan Chat</em> is an overlay that allows you to show your Twitch
+                chat (and optionally Youtube chat) on screen with OBS, XSplit, and any other streaming software that
+                supports browser sources. It supports your
+                <a href="https://betterttv.com/" target="_blank">BetterTTV</a>,
+                <a href="https://www.frankerfacez.com/" target="_blank">FrankerFaceZ</a>
+                and <a href="https://7tv.app/" target="_blank">7TV</a> emotes, always at
+                the best available quality. You have many options to customize your
+                chat, like enabling a smooth animation for new messages, or fading old
+                ones after some time.
             </p>
-            <ul>
-                <li><em>!chat refresh</em> - Refreshes the emotes in chat.</li>
-                <li><em>!chat reload</em> - Reloads the overlay.</li>
-                <li><em>!chat rickroll</em> - Rickrolls the chat.</li>
-                <li><em>!chat tts</em> - Lets you send a tts message (Also can specify a voice with -v {voice}).</li>
-            </ul>
+        </div>
+
+        <details class="elevation-2 slideUp">
+            <summary>Commands</summary>
+            <div class="details-content">
+                <p>
+                    <em>Cyan Chat</em> comes with a few mod only commands that you
+                    can use in chat.
+                </p>
+                <ul>
+                    <li><em>!chat refresh</em> - Refreshes the emotes in chat.</li>
+                    <li><em>!chat reload</em> - Reloads the overlay.</li>
+                    <li><em>!chat rickroll</em> - Rickrolls the chat.</li>
+                    <li><em>!chat tts</em> - Lets you send a tts message (Also can specify a voice with -v {voice}).</li>
+                </ul>
+            </div>
         </details>
 
-        <details>
-            <summary style="text-align: center;">
-                Voices
-            </summary>
-            <p>
-                <em>Cyan Chat</em> supports the following voices:
-                <br />
-            <ul>
-                <li>Brian</li>
-                <li>Ivy</li>
-                <li>Justin</li>
-                <li>Russell</li>
-                <li>Nicole</li>
-                <li>Emma</li>
-                <li>Amy</li>
-                <li>Joanna</li>
-                <li>Salli</li>
-                <li>Kimberly</li>
-                <li>Kendra</li>
-                <li>Joey</li>
-                <li>Mizuki (Japanese)</li>
-                <li>Chantal (French)</li>
-                <li>Mathieu (French)</li>
-                <li>Maxim (Russian)</li>
-                <li>Hans (German)</li>
-                <li>Raveena (Indian)</li>
-            </ul>
-            </p>
-        </details>
+        <!-- <details class="elevation-2 slideUp">
+            <summary>Voices</summary>
+            <div class="details-content">
+                <p>
+                    <em>Cyan Chat</em> supports the following voices:
+                </p>
+                <ul class="voice-list">
+                    <li>Brian</li>
+                    <li>Ivy</li>
+                    <li>Justin</li>
+                    <li>Russell</li>
+                    <li>Nicole</li>
+                    <li>Emma</li>
+                    <li>Amy</li>
+                    <li>Joanna</li>
+                    <li>Salli</li>
+                    <li>Kimberly</li>
+                    <li>Kendra</li>
+                    <li>Joey</li>
+                    <li>Mizuki (Japanese)</li>
+                    <li>Chantal (French)</li>
+                    <li>Mathieu (French)</li>
+                    <li>Maxim (Russian)</li>
+                    <li>Hans (German)</li>
+                    <li>Raveena (Indian)</li>
+                </ul>
+            </div>
+        </details> -->
 
-        <form name="generator">
-            <div class="form_row center">
-                <input type="text" name="channel" required placeholder="Twitch Channel" />
-            </div>
-            <div class="form_row center">
-                <input type="text" name="yt-channel" placeholder="YT ID or Handle (Optional)" />
-            </div>
-            <div class="form_table">
-                <div class="form_col">
-                    <div class="form_row left">
-                        <select name="size">
-                            <option value="1">Small</option>
-                            <option value="2">Medium</option>
-                            <option value="3" selected>Large</option>
-                        </select>
-                        <label for="size">Size</label>
-                    </div>
-                    <div class="form_row left">
-                        <select name="emote_scale">
-                            <option value="1" selected>1x</option>
-                            <option value="2">2x</option>
-                            <option value="3">3x</option>
-                        </select>
-                        <label for="emote_scale">Emote Scale</label>
-                    </div>
-                    <div class="form_row left">
-                        <select name="font">
-                            <option value="0" selected>Baloo Tammudu</option>
-                            <option value="1">Segoe UI</option>
-                            <option value="2">Roboto</option>
-                            <option value="3">Lato</option>
-                            <option value="4">Noto Sans</option>
-                            <option value="5">Source Code Pro</option>
-                            <option value="6">Impact</option>
-                            <option value="7">Comfortaa</option>
-                            <option value="8">Dancing Script</option>
-                            <option value="9">Indie Flower</option>
-                            <option value="10">Press Start 2P</option>
-                            <option value="11">Wallpoet</option>
-                            <option value="12">Custom</option>
-                        </select>
-                        <label for="font">Font</label>
-                    </div>
-                    <div class="form_row left">
-                        <select name="height">
-                            <option value="0">Smallest</option>
-                            <option value="1">Smaller</option>
-                            <option value="2">Small</option>
-                            <option value="3" selected>Medium</option>
-                            <option value="4">Large</option>
-                            <option value="5">Largest</option>
-                        </select>
-                        <label for="height">Line Height</label>
-                    </div>
-                    <div class="form_row left">
-                        <select name="voice">
-                            <option value="Brian" selected>Brian</option>
-                            <option value="Ivy">Ivy</option>
-                            <option value="Justin">Justin</option>
-                            <option value="Russell">Russell</option>
-                            <option value="Nicole">Nicole</option>
-                            <option value="Emma">Emma</option>
-                            <option value="Amy">Amy</option>
-                            <option value="Joanna">Joanna</option>
-                            <option value="Salli">Salli</option>
-                            <option value="Kimberly">Kimberly</option>
-                            <option value="Kendra">Kendra</option>
-                            <option value="Joey">Joey</option>
-                            <option value="Mizuki">Mizuki (Japanese)</option>
-                            <option value="Chantal">Chantal (French)</option>
-                            <option value="Mathieu">Mathieu (French)</option>
-                            <option value="Maxim">Maxim (Russian)</option>
-                            <option value="Hans">Hans (German)</option>
-                            <option value="Raveena">Raveena (Indian)</option>
-                        </select>
-                        <label for="height">TTS Voice</label>
-                    </div>
-                    <br />
-                    <div class="form_row left">
-                        <input type="checkbox" name="bots" />
-                        <label for="bots">Show bots</label>
-                    </div>
-                    <div class="form_row left">
-                        <input type="checkbox" name="commands" />
-                        <label for="commands">Hide commands</label>
-                    </div>
-                    <div class="form_row left">
-                        <input type="checkbox" name="badges" />
-                        <label for="badges">Hide badges</label>
-                    </div>
-                    <div class="form_row left">
-                        <input type="checkbox" name="center" />
-                        <label for="center">Center (Like StreamLabs)</label>
-                    </div>
-                    <div class="form_row left">
-                        <input type="checkbox" name="readable" checked />
-                        <label for="readable">Readable Colors</label>
-                    </div>
-                    <div class="form_row left">
-                        <input type="checkbox" name="sync" />
-                        <a href="javascript:void(0);" id="emoteSyncLink" onclick="showPopup('emote-sync')">
-                            <label for="sync" style="color:rgb(0, 157, 255); font-weight: normal;">Disable Emote Sync*</label>
-                        </a>
-                    </div>
-                    <div class="form_row left">
-                        <input type="checkbox" name="pruning" />
-                        <a href="javascript:void(0);" id="messagePruningLink" onclick="showPopup('message-pruning')">
-                            <label for="pruning" style="color:rgb(0, 157, 255); font-weight: normal;">Disable Message Pruning*</label>
-                        </a>
-                    </div>
-                </div>
-                <div class="form_col">
-                    <div class="form_row right">
-                        <label for="stroke">Stroke</label>
-                        <select name="stroke">
-                            <option value="0" selected>Off</option>
-                            <option value="1">Fine</option>
-                            <option value="2">Thick</option>
-                        </select>
-                    </div>
-                    <div class="form_row right">
-                        <label for="shadow">Shadow</label>
-                        <select name="shadow">
-                            <option value="0" selected>Off</option>
-                            <option value="1">Small</option>
-                            <option value="2">Medium</option>
-                            <option value="3">Large</option>
-                        </select>
-                    </div>
-                    <div class="form_row right">
-                        <label for="custom_font">Custom Font</label>
-                        <input type="text" name="custom_font" placeholder="Font Name" disabled />
-                    </div>
-                    <div class="form_row right">
-                        <label for="weight">Weight</label>
-                        <select name="weight">
-                            <option value="1">Thinest</option>
-                            <option value="2">Thin</option>
-                            <option value="3">Small</option>
-                            <option value="4" selected>Default</option>
-                            <option value="5">Thick</option>
-                        </select>
-                    </div>
-                    <div class="form_row right" style="opacity: 0; pointer-events: none">
-                        <label for="placeholder">placeholder</label>
-                        <select name="placeholder">
-                            <option value="1" selected>placeholder</option>
-                        </select>
-                    </div>
-                    <br />
-                    <div class="form_row right">
-                        <label for="animate">Animate</label>
-                        <input type="checkbox" name="animate" checked />
-                    </div>
-                    <div class="form_row right">
-                        <label for="fade">Fade</label>
-                        <input type="text" name="fade" value="60" class="short hidden" /><span id="fade_seconds"
-                            class="hidden">sec</span>
-                        <input type="checkbox" name="fade_bool" />
-                    </div>
-                    <div class="form_row right">
-                        <label for="small_caps">Caps</label>
-                        <input type="checkbox" name="small_caps" />
-                    </div>
-                    <div class="form_row right">
-                        <label for="invert">Invert</label>
-                        <input type="checkbox" name="invert" />
-                    </div>
-                    <div class="form_row right">
-                        <label for="paints">Hide 7tv Paints</label>
-                        <input type="checkbox" name="paints" />
-                    </div>
-                    <div class="form_row right">
-                        <label for="colon">Hide Colon</label>
-                        <input type="checkbox" name="colon" />
-                    </div>
-                </div>
-            </div>
-            <div class="form_group center" style="width: 100%; margin-bottom: 10px">
-                <label for="regex" style="
-              width: 100%;
-              display: block;
-              text-align: center;
-              margin-bottom: 5px;
-              margin-top: 10px;
-            ">Regex Blacklist</label>
-                <input type="text" name="regex" placeholder="Regex Pattern to Block ex: ^[1-8]$" />
-            </div>
-            <div class="form_group center" style="width: 100%; height: 40px; margin-bottom: 20px">
-                <label for="blocked_users" style="
-              width: 100%;
-              display: block;
-              text-align: center;
-              margin-bottom: 5px;
-              margin-top: 10px;
-            ">Users/Bots Blocked List</label>
-                <input type="text" name="blocked_users" placeholder="Extra users or bots to hide. Comma separated."
-                    style="width: 75% !important; display: block; margin: 0 auto" />
+        <form name="generator" class="card elevation-3 slideUp">
+            <!-- Restructure the form into two main sections -->
+            <div class="main-section-header">
+                <h3>Channel Settings</h3>
             </div>
 
-            <div id="submit_container">
-                <div class="preview">
-                    <img id="Lea pepePoint" src="img/light.png" /> <label>Preview:</label>
+            <div class="channel-section form-section">
+                <div class="stacked-inputs" style="padding: 12px;">
+                    <div class="form_row">
+                        <label for="channel">Twitch</label>
+                        <input type="text" name="channel" required placeholder="Twitch channel name" class="standardized-width" />
+                    </div>
+                    <div class="form_row">
+                        <label for="yt-channel">YouTube</label>
+                        <input type="text" name="yt-channel" placeholder="YouTube ID or Handle (Optional)" class="standardized-width" />
+                    </div>
                 </div>
-                <div id="example" style='font-family: "Baloo Tammudu 2", cursive'>
-                    <div class="chat_line">
-                        <span class="user_info"><img class="badge"
-                                src="https://cdn.frankerfacez.com/room-badge/mod/majijej/4/rounded" /><img class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
-                                class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/4300a897-03dc-4e83-8c0e-c332fee7057f/3" /><img
-                                class="badge" src="https://cdn.7tv.app/badge/6508d5bd55deb74f50368f40/3x" /><span
-                                class="nick"
-                                style="color: transparent; position: absolute; z-index:0;">Johnnycyan</span><span
-                                class="nick paint" style="
+            </div>
+
+            <!-- Two main sections: Controls and Appearance -->
+            <div class="form-container">
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3>Appearance Settings</h3>
+                    </div>
+
+                    <div class="form_table">
+                        <div class="form_col" style="align-items: start; flex: 60%;">
+                            <!-- Size and Scale settings -->
+                            <div class="form-field">
+                                <label for="size">Text Size</label>
+                                <select name="size" class="standardized-width">
+                                    <option value="1">Small</option>
+                                    <option value="2">Medium</option>
+                                    <option value="3" selected>Large</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="emote_scale">Emote Scale</label>
+                                <select name="emote_scale" class="standardized-width">
+                                    <option value="1" selected>1x</option>
+                                    <option value="2">2x</option>
+                                    <option value="3">3x</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="height">Line Height</label>
+                                <select name="height" class="standardized-width">
+                                    <option value="0">Smallest</option>
+                                    <option value="1">Smaller</option>
+                                    <option value="2">Small</option>
+                                    <option value="3" selected>Medium</option>
+                                    <option value="4">Large</option>
+                                    <option value="5">Largest</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="font">Font</label>
+                                <select name="font" class="standardized-width">
+                                    <option value="0" selected>Baloo Tammudu</option>
+                                    <option value="1">Segoe UI</option>
+                                    <option value="2">Roboto</option>
+                                    <option value="3">Lato</option>
+                                    <option value="4">Noto Sans</option>
+                                    <option value="5">Source Code Pro</option>
+                                    <option value="6">Impact</option>
+                                    <option value="7">Comfortaa</option>
+                                    <option value="8">Dancing Script</option>
+                                    <option value="9">Indie Flower</option>
+                                    <option value="10">Press Start 2P</option>
+                                    <option value="11">Wallpoet</option>
+                                    <option value="12">Custom</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="custom_font">Custom Font</label>
+                                <input type="text" name="custom_font" placeholder="Font Name" disabled class="standardized-width" />
+                            </div>
+                            <!-- Text styling -->
+                            <div class="form-field">
+                                <label for="stroke">Text Stroke</label>
+                                <select name="stroke" class="standardized-width">
+                                    <option value="0" selected>Off</option>
+                                    <option value="1">Fine</option>
+                                    <option value="2">Thick</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="shadow">Text Shadow</label>
+                                <select name="shadow" class="standardized-width">
+                                    <option value="0" selected>Off</option>
+                                    <option value="1">Small</option>
+                                    <option value="2">Medium</option>
+                                    <option value="3">Large</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="weight">Text Weight</label>
+                                <select name="weight" class="standardized-width">
+                                    <option value="1">Thinest</option>
+                                    <option value="2">Thin</option>
+                                    <option value="3">Small</option>
+                                    <option value="4" selected>Default</option>
+                                    <option value="5">Thick</option>
+                                </select>
+                            </div>
+                            <div class="form-field compact-dropdown">
+                                <label for="voice">TTS Voice</label>
+                                <select name="voice" class="standardized-width">
+                                    <option value="Brian" selected>Brian</option>
+                                    <option value="Ivy">Ivy</option>
+                                    <option value="Justin">Justin</option>
+                                    <option value="Russell">Russell</option>
+                                    <option value="Nicole">Nicole</option>
+                                    <option value="Emma">Emma</option>
+                                    <option value="Amy">Amy</option>
+                                    <option value="Joanna">Joanna</option>
+                                    <option value="Salli">Salli</option>
+                                    <option value="Kimberly">Kimberly</option>
+                                    <option value="Kendra">Kendra</option>
+                                    <option value="Joey">Joey</option>
+                                    <option value="Mizuki">Mizuki (Japanese)</option>
+                                    <option value="Chantal">Chantal (French)</option>
+                                    <option value="Mathieu">Mathieu (French)</option>
+                                    <option value="Maxim">Maxim (Russian)</option>
+                                    <option value="Hans">Hans (German)</option>
+                                    <option value="Raveena">Raveena (Indian)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form_col" style="align-items: end; flex: 20%;">
+                            <div>
+                                <div class="checkbox-row" data-tooltip="Uses an algorithm to make username colors more readable">
+                                    <label for="readable">Readable Colors</label>
+                                    <input type="checkbox" name="readable" id="readable" checked />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="Adds a neat animation for when messages come in">
+                                    <label for="animate">Animate Messages</label>
+                                    <input type="checkbox" name="animate" id="animate" checked />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="Show messages from bot accounts">
+                                    <label for="bots">Show bots</label>
+                                    <input type="checkbox" name="bots" id="bots" />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="Hide messages starting with !">
+                                    <label for="commands">Hide commands</label>
+                                    <input type="checkbox" name="commands" id="commands" />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="Hide all badges">
+                                    <label for="badges">Hide badges</label>
+                                    <input type="checkbox" name="badges" id="badges" />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="Use normal Twitch colors instead of 7tv Paints">
+                                    <label for="paints">Hide 7tv Paints</label>
+                                    <input type="checkbox" name="paints" id="paints" />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="Hide the colon between user and message">
+                                    <label for="colon">Hide Colon</label>
+                                    <input type="checkbox" name="colon" id="colon" />
+                                </div>
+                                <div class="checkbox-row fade-row" data-tooltip="Fades and removes old messages after a set time">
+                                    <label for="fade_bool">Fade Messages</label>
+                                    <input type="checkbox" name="fade_bool" id="fade_bool" />
+                                    <div class="fade-container">
+                                        <input type="text" name="fade" value="60" class="short hidden" />
+                                        <span id="fade_seconds" class="hidden">sec</span>
+                                    </div>
+                                </div>
+                                <div class="checkbox-row">
+                                    <label for="small_caps">Use Small Caps</label>
+                                    <input type="checkbox" name="small_caps" id="small_caps" />
+                                </div>
+                                <div class="checkbox-row">
+                                    <label for="invert">Invert</label>
+                                    <input type="checkbox" name="invert" id="invert" />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="Similar to StreamLabs chat widget">
+                                    <label for="center">Center Layout</label>
+                                    <input type="checkbox" name="center" id="center" />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="Click for more info">
+                                    <label for="sync">
+                                        <a href="javascript:void(0);" onclick="showPopup('emote-sync')" style="color:var(--primary);">Disable Emote Sync*</a>
+                                    </label>
+                                    <input type="checkbox" name="sync" id="sync" />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="Click for more info">
+                                    <label for="pruning">
+                                        <a href="javascript:void(0);" onclick="showPopup('message-pruning')" style="color:var(--primary);">Disable Message Pruning*</a>
+                                    </label>
+                                    <input type="checkbox" name="pruning" id="pruning" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message filtering section -->
+                <div class="form-section" style="padding: 12px;">
+                    <div class="section-header">
+                        <h3>Message Filtering</h3>
+                    </div>
+
+                    <!-- <div class="stacked-inputs">
+                        <div class="filtering-item">
+                            <label for="regex">Regex Blacklist</label>
+                            <input type="text" name="regex" placeholder="Regex Pattern to Block ex: ^[1-8]$" class="standardized-width" />
+                        </div>
+                        <div class="filtering-item">
+                            <label for="blocked_users">Users/Bots Blocked List</label>
+                            <input type="text" name="blocked_users" placeholder="Extra users or bots to hide. Comma separated." class="standardized-width" />
+                        </div>
+                    </div> -->
+                    <div class="stacked-inputs message-filtering-section">
+                        <div class="form_row">
+                            <label for="regex">Regex Blacklist</label>
+                            <input type="text" name="regex" placeholder="Regex Pattern to Block ex: ^[1-8]$" class="standardized-width" />
+                        </div>
+                        <div class="form_row">
+                            <label for="blocked_users">Users/Bots Blocked List</label>
+                            <input type="text" name="blocked_users" placeholder="Extra users or bots to hide. Comma separated." class="standardized-width" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview and submit section -->
+                <div id="submit_container" class="elevation-2">
+                    <div class="preview">
+                        <label>
+                            <a href="javascript:void(0);" onclick="toggleTheme()">Preview</a>
+                        </label>
+                        <!-- <img id="brightness" src="img/light.png" alt="Toggle theme" /> <label>Preview</label> -->
+                    </div>
+                    <div id="example" style='font-family: "Baloo Tammudu 2", cursive'>
+                        <div class="chat_line">
+                            <span class="user_info"><img class="badge"
+                                    src="https://cdn.frankerfacez.com/room-badge/mod/majijej/4/rounded" /><img class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
+                                    class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/4300a897-03dc-4e83-8c0e-c332fee7057f/3" /><img
+                                    class="badge" src="https://cdn.7tv.app/badge/6508d5bd55deb74f50368f40/3x" /><span
+                                    class="nick"
+                                    style="color: transparent; position: absolute; z-index:0;">Johnnycyan</span><span
+                                    class="nick paint" style="
                     color: rgb(0, 217, 255);
                     background-image: linear-gradient(
                       156deg,
@@ -424,23 +473,23 @@
                       drop-shadow(rgb(255, 112, 243) 1px 0px 0.1px)
                       drop-shadow(rgb(95, 124, 116) 1px 0px 3px);
                   ">Johnnycyan</span><span class="colon"> :</span> </span><span class="message"><img
-                                class="cheer_emote"
-                                src="https://d3aqoihi2n8ty8.cloudfront.net/actions/cheer/dark/animated/100/4.gif" /><span
-                                class="cheer_bits">100</span>
-                            Nice chat
-                            <img class="emote"
-                                src="https://cdn.7tv.app/emote/60ae7316f7c927fad14e6ca2/4x.webp" /></span>
-                    </div>
-                    <div class="chat_line">
-                        <span class="user_info"><img class="badge"
-                                src="https://cdn.frankerfacez.com/room-badge/mod/majijej/4/rounded" /><img class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
-                                class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/4300a897-03dc-4e83-8c0e-c332fee7057f/3" /><img
-                                class="badge" src="https://cdn.7tv.app/badge/6508d5bd55deb74f50368f40/3x" /><span
-                                class="nick"
-                                style="color: transparent; position: absolute; z-index:0;">Johnnycyan</span><span
-                                class="nick paint" style="
+                                    class="cheer_emote"
+                                    src="https://d3aqoihi2n8ty8.cloudfront.net/actions/cheer/dark/animated/100/4.gif" /><span
+                                    class="cheer_bits">100</span>
+                                Nice chat
+                                <img class="emote"
+                                    src="https://cdn.7tv.app/emote/60ae7316f7c927fad14e6ca2/4x.webp" /></span>
+                        </div>
+                        <div class="chat_line">
+                            <span class="user_info"><img class="badge"
+                                    src="https://cdn.frankerfacez.com/room-badge/mod/majijej/4/rounded" /><img class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
+                                    class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/4300a897-03dc-4e83-8c0e-c332fee7057f/3" /><img
+                                    class="badge" src="https://cdn.7tv.app/badge/6508d5bd55deb74f50368f40/3x" /><span
+                                    class="nick"
+                                    style="color: transparent; position: absolute; z-index:0;">Johnnycyan</span><span
+                                    class="nick paint" style="
                     color: rgb(0, 217, 255);
                     background-image: linear-gradient(
                       156deg,
@@ -453,14 +502,14 @@
                       drop-shadow(rgb(255, 112, 243) 1px 0px 0.1px)
                       drop-shadow(rgb(95, 124, 116) 1px 0px 3px);
                   ">Johnnycyan</span><span class="colon"> :</span></span><span class="message">gn xen
-                            <img class="emote" src="https://cdn.7tv.app/emote/63882e9d346422503a288b5e/4x.webp"
-                                style="visibility: visible" /></span>
-                    </div>
-                    <div class="chat_line">
-                        <span class="user_info"><img class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/a730d387-f884-4230-bcab-9d4ca2743580/3" /><span
-                                class="nick" style="color: rgb(77, 38, 134)">czero42</span><span class="colon">
-                                :</span></span><span class="message"><span class="mention paint" style="
+                                <img class="emote" src="https://cdn.7tv.app/emote/63882e9d346422503a288b5e/4x.webp"
+                                    style="visibility: visible" /></span>
+                        </div>
+                        <div class="chat_line">
+                            <span class="user_info"><img class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/a730d387-f884-4230-bcab-9d4ca2743580/3" /><span
+                                    class="nick" style="color: rgb(77, 38, 134)">czero42</span><span class="colon">
+                                    :</span></span><span class="message"><span class="mention paint" style="
                     color: rgb(255, 0, 0);
                     background-image: linear-gradient(
                       0deg,
@@ -471,19 +520,20 @@
                     );
                     filter: drop-shadow(rgb(15, 175, 255) 0px 0px 0.1px);
                   ">@xen_ninjas</span>
-                            gn
-                            <img class="emote" src="https://cdn.7tv.app/emote/63882e9d346422503a288b5e/4x.webp"
-                                style="visibility: visible"/><img class="emote" src="https://cdn.7tv.app/emote/639008385901e8ad82935b7f/4x.webp"
-                                style="visibility: visible"/></span>
-                    </div>
-                    <div class="chat_line">
-                        <span class="user_info"><img class="badge"
-                                src="https://cdn.frankerfacez.com/room-badge/mod/majijej/4/rounded" /><img class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
-                                class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/617b0a83-e235-4d1c-9977-7cefe451f545/3" /><span
-                                class="nick" style="color: rgb(0, 255, 127)">LeoHi_93</span><span class="colon">
-                                :</span></span><span class="message"><span class="mention paint" style="
+                                gn
+                                <img class="emote" src="https://cdn.7tv.app/emote/63882e9d346422503a288b5e/4x.webp"
+                                    style="visibility: visible" /><img class="emote"
+                                    src="https://cdn.7tv.app/emote/639008385901e8ad82935b7f/4x.webp"
+                                    style="visibility: visible" /></span>
+                        </div>
+                        <div class="chat_line">
+                            <span class="user_info"><img class="badge"
+                                    src="https://cdn.frankerfacez.com/room-badge/mod/majijej/4/rounded" /><img class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
+                                    class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/617b0a83-e235-4d1c-9977-7cefe451f545/3" /><span
+                                    class="nick" style="color: rgb(0, 255, 127)">LeoHi_93</span><span class="colon">
+                                    :</span></span><span class="message"><span class="mention paint" style="
                     color: rgb(255, 0, 0);
                     background-image: linear-gradient(
                       0deg,
@@ -494,20 +544,20 @@
                     );
                     filter: drop-shadow(rgb(15, 175, 255) 0px 0px 0.1px);
                   ">@xen_ninjas</span>
-                            gn
-                            <img class="emote" src="https://cdn.7tv.app/emote/63882e9d346422503a288b5e/4x.webp"
-                                style="visibility: visible"/><img class="emote"
-                                src="https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_24396e3f5a64449e9ba19b794b0a6aa6/default/dark/3.0"
-                                style="visibility: visible"/></span>
-                    </div>
-                    <div class="chat_line">
-                        <span class="user_info"><img class="badge"
-                                src="https://cdn.frankerfacez.com/room-badge/vip/majijej/4" /><img class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
-                                class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/2a4d0b84-9075-4bb5-ae56-ccaf47a3ac37/3" /><img
-                                class="badge" src="https://cdn.7tv.app/badge/62f97f19e46eb00e438a696f/3x" /><span
-                                class="nick" style="
+                                gn
+                                <img class="emote" src="https://cdn.7tv.app/emote/63882e9d346422503a288b5e/4x.webp"
+                                    style="visibility: visible" /><img class="emote"
+                                    src="https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_24396e3f5a64449e9ba19b794b0a6aa6/default/dark/3.0"
+                                    style="visibility: visible" /></span>
+                        </div>
+                        <div class="chat_line">
+                            <span class="user_info"><img class="badge"
+                                    src="https://cdn.frankerfacez.com/room-badge/vip/majijej/4" /><img class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
+                                    class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/2a4d0b84-9075-4bb5-ae56-ccaf47a3ac37/3" /><img
+                                    class="badge" src="https://cdn.7tv.app/badge/62f97f19e46eb00e438a696f/3x" /><span
+                                    class="nick" style="
                   color: transparent;
                   position: absolute;
                   z-index:0;
@@ -522,20 +572,21 @@
                     );
                     filter: drop-shadow(rgb(15, 175, 255) 0px 0px 0.1px);
                   ">xen_ninjas</span><span class="colon"> :</span></span><span class="message"><img class="emote"
-                                src="https://cdn.7tv.app/emote/639008385901e8ad82935b7f/4x.webp"
-                                style="visibility: visible"/><img class="emote" src="https://cdn.7tv.app/emote/6107cb319dc18aaf9f0e451e/4x.webp"
-                                style="visibility: visible"/></span>
-                    </div>
-                    <div class="chat_line">
-                        <span class="user_info"><img class="badge"
-                                src="https://cdn.frankerfacez.com/room-badge/mod/majijej/4/rounded" /><img class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
-                                class="badge"
-                                src="https://static-cdn.jtvnw.net/badges/v1/4300a897-03dc-4e83-8c0e-c332fee7057f/3" /><img
-                                class="badge" src="https://cdn.7tv.app/badge/6508d5bd55deb74f50368f40/3x" /><span
-                                class="nick"
-                                style="color: transparent; position: absolute; z-index:0;">Johnnycyan</span><span
-                                class="nick paint" style="
+                                    src="https://cdn.7tv.app/emote/639008385901e8ad82935b7f/4x.webp"
+                                    style="visibility: visible" /><img class="emote"
+                                    src="https://cdn.7tv.app/emote/6107cb319dc18aaf9f0e451e/4x.webp"
+                                    style="visibility: visible" /></span>
+                        </div>
+                        <div class="chat_line">
+                            <span class="user_info"><img class="badge"
+                                    src="https://cdn.frankerfacez.com/room-badge/mod/majijej/4/rounded" /><img class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/b2dc1665-2b75-4ce4-af11-086e70ecfcc5/3" /><img
+                                    class="badge"
+                                    src="https://static-cdn.jtvnw.net/badges/v1/4300a897-03dc-4e83-8c0e-c332fee7057f/3" /><img
+                                    class="badge" src="https://cdn.7tv.app/badge/6508d5bd55deb74f50368f40/3x" /><span
+                                    class="nick"
+                                    style="color: transparent; position: absolute; z-index:0;">Johnnycyan</span><span
+                                    class="nick paint" style="
                     color: rgb(0, 217, 255);
                     background-image: linear-gradient(
                       156deg,
@@ -558,34 +609,51 @@
                     );
                     filter: drop-shadow(rgb(15, 175, 255) 0px 0px 0.1px);
                   ">@xen_ninjas</span>
-                            <img class="emote" src="https://cdn.7tv.app/emote/639234ce908ab3ef06b3c640/4x.webp"
-                                style="visibility: visible"/><img class="emote" src="https://cdn.7tv.app/emote/61a78600e9684edbbc37c61c/4x.webp"
-                                style="visibility: visible"/></span>
+                                <img class="emote" src="https://cdn.7tv.app/emote/639234ce908ab3ef06b3c640/4x.webp"
+                                    style="visibility: visible" /><img class="emote"
+                                    src="https://cdn.7tv.app/emote/61a78600e9684edbbc37c61c/4x.webp"
+                                    style="visibility: visible" /></span>
+                        </div>
                     </div>
+                    <button type="submit" class="generate-button">
+                        <span class="button-text">Generate</span>
+                        <span class="button-icon">➜</span>
+                    </button>
                 </div>
-                <input type="submit" value="Generate" />
             </div>
         </form>
-        <div id="result" class="hidden">
-            <div id="alert">Copied to clipboard</div>
+
+        <div id="result" class="card elevation-3 hidden">
+            <div id="alert" class="alert-success">Copied to clipboard</div>
+            <h3>Your Overlay URL</h3>
             <input type="text" id="url" readonly />
             <p>
                 Configure a new browser source on your streaming software with the
                 given URL.
             </p>
-            <input type="button" id="go-back" value="Go Back" style="margin-bottom: 10px;" />
-            <input type="button" id="reset" value="Reset" />
+            <div class="button-group">
+                <button id="go-back" class="secondary-button">
+                    <span class="button-icon">←</span>
+                    <span class="button-text">Go Back</span>
+                </button>
+                <button id="reset" class="danger-button">
+                    <span class="button-icon">↺</span>
+                    <span class="button-text">Reset</span>
+                </button>
+            </div>
         </div>
     </section>
 
-    <section id="donation">
-        <span>This app is and will always be free.<br />If you like it and want to
-            support, feel free to buy me an energy drink
-            <img class="emote" src="img/Okayge.png" /><img class="emote" src="img/RedBullTime.gif" /></span>
-        <form action="https://ko-fi.com/johnnycyan" method="post" target="_top">
-            <input type="hidden" name="hosted_button_id" value="SRGWJ9QMHMHUG" />
-            <input id="donate" type="submit" title="ko-fi" alt="Donate with Ko-Fi button" value="Donate" />
-        </form>
+    <section id="donation" class="elevation-3">
+        <div class="donation-content">
+            <span>This app is and will always be free.<br />If you like it and want to
+                support, feel free to buy me an energy drink
+                <img class="emote" src="img/Okayge.png" /><img class="emote" src="img/RedBullTime.gif" /></span>
+            <form action="https://ko-fi.com/johnnycyan" method="post" target="_top">
+                <input type="hidden" name="hosted_button_id" value="SRGWJ9QMHMHUG" />
+                <input id="donate" type="submit" title="ko-fi" alt="Donate with Ko-Fi button" value="Donate" />
+            </form>
+        </div>
     </section>
 
     <footer>
