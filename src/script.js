@@ -1,37 +1,3 @@
-// (function ($) {
-//     // Thanks to BrunoLM (https://stackoverflow.com/a/3855394)
-//     $.QueryString = (function (paramsArray) {
-//       let params = {};
-
-//       for (let i = 0; i < paramsArray.length; ++i) {
-//         let param = paramsArray[i].split("=", 2);
-
-//         if (param.length !== 2) continue;
-
-//         params[param[0]] = decodeURIComponent(param[1].replace(/\+/g, " "));
-//       }
-
-//       return params;
-//     })(window.location.search.substr(1).split("&"));
-
-//     // Check if 'v' parameter exists
-//     if (!$.QueryString.hasOwnProperty("v")) {
-//       console.log("'v' parameter is not present.");
-//       var currentUrl = window.location.href;
-//       var newUrl = addRandomQueryString(currentUrl);
-//       window.location.href = newUrl;
-//     } else {
-//       // Check if 'v' parameter is valid
-//       if (Date.now() - $.QueryString.v > 10000) {
-//         console.log("'v' parameter is not up to date.");
-//         var currentUrl = window.location.href;
-//         var cleanUrl = removeRandomQueryString(currentUrl);
-//         var newUrl = addRandomQueryString(cleanUrl);
-//         window.location.href = newUrl;
-//       }
-//     }
-//   })(jQuery);
-
 applyStyles("size", sizes[2]);
 
 function fadeOption(event) {
@@ -42,6 +8,90 @@ function fadeOption(event) {
         $fade.addClass("hidden");
         $fade_seconds.addClass("hidden");
     }
+}
+
+// New Popup Manager
+const popup = {
+    elements: {
+        overlay: document.getElementById('popupOverlay'),
+        container: document.getElementById('popupContainer'),
+        title: document.getElementById('popupTitle'),
+        content: document.getElementById('popupContent'),
+        closeBtn: document.getElementById('popupClose')
+    },
+    
+    // Configuration for different popups
+    types: {
+        'emote-sync': {
+            title: 'Emote Sync',
+            contentId: 'emote-sync-content'
+        },
+        'message-pruning': {
+            title: 'Message Pruning',
+            contentId: 'message-pruning-content'
+        }
+    },
+    
+    // Open popup with specific type
+    open: function(type) {
+        if (!this.types[type]) return;
+        
+        // Set popup content
+        this.elements.title.textContent = this.types[type].title;
+        const contentTemplate = document.getElementById(this.types[type].contentId);
+        
+        if (contentTemplate) {
+            this.elements.content.innerHTML = contentTemplate.innerHTML;
+        }
+        
+        // Show and animate popup
+        this.elements.overlay.classList.add('active');
+        
+        // Delay the container animation slightly for a nicer effect
+        setTimeout(() => {
+            this.elements.container.classList.add('active');
+        }, 50);
+    },
+    
+    // Close popup
+    close: function() {
+        this.elements.container.classList.remove('active');
+        
+        // Wait for animation to finish before hiding the overlay
+        setTimeout(() => {
+            this.elements.overlay.classList.remove('active');
+        }, 300);
+    },
+    
+    // Initialize the popup system
+    init: function() {
+        // Close button click
+        this.elements.closeBtn.addEventListener('click', () => this.close());
+        
+        // Click outside to close
+        this.elements.overlay.addEventListener('click', (e) => {
+            if (e.target === this.elements.overlay) {
+                this.close();
+            }
+        });
+        
+        // Escape key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.elements.overlay.classList.contains('active')) {
+                this.close();
+            }
+        });
+    }
+};
+
+// Initialize popup when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    popup.init();
+});
+
+// Unified popup show function
+function showPopup(type) {
+    popup.open(type);
 }
 
 function sizeUpdate(event) {
@@ -199,18 +249,8 @@ function centerUpdate(event) {
 
 function syncUpdate(event) {
     if (!$sync.is(":checked")) {
-        showPopup();
+        showPopup('emote-sync');
     }
-}
-
-function showPopup() {
-    document.getElementById("emotePopup").style.display = "block";
-    document.getElementById("popupBackground").style.display = "block";
-}
-
-function closePopup() {
-    document.getElementById("emotePopup").style.display = "none";
-    document.getElementById("popupBackground").style.display = "none";
 }
 
 function generateURL(event) {
@@ -245,6 +285,7 @@ function generateURL(event) {
         emoteScale: $emoteScale.val(),
         font: selectedFont,
         height: $height.val(),
+        voice: $voice.val(),
         stroke: $stroke.val() != "0" ? $stroke.val() : false,
         weight: $weight.val() != "4" ? $weight.val() : false,
         shadow: $shadow.val() != "0" ? $shadow.val() : false,
@@ -273,16 +314,6 @@ function generateURL(event) {
     $result.removeClass("hidden");
 }
 
-// function changePreview(event) {
-//     if ($example.hasClass("white")) {
-//         $example.removeClass("white");
-//         $brightness.attr("src", "img/light.png");
-//     } else {
-//         $example.addClass("white");
-//         $brightness.attr("src", "img/dark.png");
-//     }
-// }
-
 function copyUrl(event) {
     navigator.clipboard.writeText($url.val());
 
@@ -306,6 +337,7 @@ function resetForm(event) {
     $emoteScale.val("1");
     $font.val("0");
     $height.val("4");
+    $voice.val("Brian");
     $stroke.val("0");
     $weight.val("4");
     $shadow.val("0");
@@ -338,7 +370,6 @@ function resetForm(event) {
     colonUpdate();
     capsUpdate();
     centerUpdate();
-    // if ($example.hasClass("white")) changePreview();
 
     $result.addClass("hidden");
     $generator.removeClass("hidden");
@@ -373,6 +404,7 @@ const $size = $("select[name='size']");
 const $emoteScale = $("select[name='emote_scale']");
 const $font = $("select[name='font']");
 const $height = $("select[name='height']");
+const $voice = $("select[name='voice']");
 const $custom_font = $("input[name='custom_font']");
 const $stroke = $("select[name='stroke']");
 const $weight = $("select[name='weight']");
@@ -402,9 +434,8 @@ $badges.change(badgesUpdate);
 $paints.change(paintsUpdate);
 $colon.change(colonUpdate);
 $generator.submit(generateURL);
-// $brightness.click(changePreview);
 $url.click(copyUrl);
 $alert.click(showUrl);
 $reset.click(resetForm);
 $goBack.click(backToForm);
-// $sync.change(syncUpdate);
+$sync.change(syncUpdate);

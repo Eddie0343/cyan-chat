@@ -127,6 +127,10 @@ Chat = {
       "yt" in $.QueryString
         ? $.QueryString.yt.toLowerCase()
         : false,
+    voice:
+      "voice" in $.QueryString
+        ? $.QueryString.voice.toLowerCase()
+        : false,
   },
 
   loadEmotes: function (channelID) {
@@ -1258,10 +1262,16 @@ Chat = {
     return username.replace(/\\s$/, '').trim();
   },
 
-  clearChat: function () {
-    setTimeout(function () {
-      $(".chat_line").remove();
-    }, 100);
+  clearChat: function(nick) {
+    setTimeout(function() {
+        $('.chat_line[data-nick=' + nick + ']').remove();
+    }, 200);
+  },
+
+  clearWholeChat: function() {
+    setTimeout(function() {
+        $('.chat_line').remove();
+    }, 200);
   },
 
   clearMessage: function (id) {
@@ -1325,8 +1335,14 @@ Chat = {
                 Chat.clearMessage(message.tags["target-msg-id"]);
               return;
             case "CLEARCHAT":
-              console.log("Cyan Chat: Clearing chat...");
-              Chat.clearChat();
+              console.log(message);
+              if (message.params[1]) {
+                Chat.clearChat(message.params[1]);
+                console.log("Cyan Chat: Clearing chat of " + message.params[1]);
+              } else {
+                Chat.clearWholeChat();
+                console.log("Cyan Chat: Clearing chat...");
+              }
               return;
             case "PRIVMSG":
               if (!message.params[1])
@@ -1494,8 +1510,16 @@ Chat = {
                   const allowedVoices = [
                     "Brian", "Ivy", "Justin", "Russell", "Nicole", "Emma", "Amy", "Joanna",
                     "Salli", "Kimberly", "Kendra", "Joey", "Mizuki", "Chantal", "Mathieu",
-                    "Maxim", "Hans", "Raveena"
+                    "Maxim", "Hans", "Raveena", "Tatyana"
                   ];
+
+                  if (Chat.info.voice) {
+                    normalizedVoiceConfig = Chat.info.voice.charAt(0).toUpperCase() + Chat.info.voice.slice(1).toLowerCase();
+                    console.log(normalizedVoiceConfig);
+                    if (allowedVoices.includes(normalizedVoiceConfig)) {
+                      voice = normalizedVoiceConfig;
+                    }
+                  }
 
                   // Check for voice in flags
                   const potentialVoice = flags.v || flags.voice || flags.s;

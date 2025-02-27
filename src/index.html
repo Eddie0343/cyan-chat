@@ -25,16 +25,106 @@
     <script src="syncEmotes.js"></script>
     <script src="styles.js"></script>
     <script src="script.js" defer></script>
+    <style>
+        /* Popup Styling */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .popup-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background-color: #272727;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            max-width: 500px;
+            width: 80%;
+            opacity: 0;
+            transition: all 0.3s ease;
+            border: 2px solid #00D9FF;
+        }
+
+        .popup-container.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .popup-overlay.active {
+            opacity: 1;
+            display: block;
+        }
+
+        .popup-header {
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .popup-header h2 {
+            margin-top: 0;
+            color: #00D9FF;
+        }
+
+        .popup-content {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .popup-footer {
+            text-align: center;
+        }
+
+        .popup-close {
+            background-color: #00D9FF;
+            color: #111;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .popup-close:hover {
+            background-color: #00a5c4;
+        }
+
+        .popup-content p {
+            margin: 5px 0;
+        }
+    </style>
 </head>
 
 <body>
-    <div id="popupBackground" onclick="closePopup()"></div>
-    <!-- Modal Structure -->
-    <div id="emotePopup">
-        <h2>Info</h2>
-        <p>Emote Sync is experimental. It can be laggy when there are many emotes being spammed at once. Even so it is the recommended default to have it on. Its purpose is to keep all emotes in sync with each other. If you have performance issues then you can use this to disable it.</p>
-        <button id="emotePopupButton" onclick="closePopup()">Close</button>
+    <!-- Unified popup system -->
+    <div id="popupOverlay" class="popup-overlay">
+        <div id="popupContainer" class="popup-container">
+            <div class="popup-header">
+                <h2 id="popupTitle">Title</h2>
+            </div>
+            <div class="popup-content" id="popupContent">
+                <!-- Popup content will be injected here -->
+            </div>
+            <div class="popup-footer">
+                <button class="popup-close" id="popupClose">Close</button>
+            </div>
+        </div>
     </div>
+
     <header>
         <img src="img/CyanChat.webp" />
         <div>
@@ -161,6 +251,29 @@
                         </select>
                         <label for="height">Line Height</label>
                     </div>
+                    <div class="form_row left">
+                        <select name="voice">
+                            <option value="Brian" selected>Brian</option>
+                            <option value="Ivy">Ivy</option>
+                            <option value="Justin">Justin</option>
+                            <option value="Russell">Russell</option>
+                            <option value="Nicole">Nicole</option>
+                            <option value="Emma">Emma</option>
+                            <option value="Amy">Amy</option>
+                            <option value="Joanna">Joanna</option>
+                            <option value="Salli">Salli</option>
+                            <option value="Kimberly">Kimberly</option>
+                            <option value="Kendra">Kendra</option>
+                            <option value="Joey">Joey</option>
+                            <option value="Mizuki">Mizuki (Japanese)</option>
+                            <option value="Chantal">Chantal (French)</option>
+                            <option value="Mathieu">Mathieu (French)</option>
+                            <option value="Maxim">Maxim (Russian)</option>
+                            <option value="Hans">Hans (German)</option>
+                            <option value="Raveena">Raveena (Indian)</option>
+                        </select>
+                        <label for="height">TTS Voice</label>
+                    </div>
                     <br />
                     <div class="form_row left">
                         <input type="checkbox" name="bots" />
@@ -184,14 +297,15 @@
                     </div>
                     <div class="form_row left">
                         <input type="checkbox" name="sync" />
-                        <!-- <a href="javascript:void(0);" id="emoteSyncLink" onclick="showPopup()">
-                            <label for="sync" style="color:red;">Disable Emote Sync*</label>
-                        </a> -->
-                        <label for="sync">Disable Emote Sync</label>
+                        <a href="javascript:void(0);" id="emoteSyncLink" onclick="showPopup('emote-sync')">
+                            <label for="sync" style="color:rgb(0, 157, 255); font-weight: normal;">Disable Emote Sync*</label>
+                        </a>
                     </div>
                     <div class="form_row left">
                         <input type="checkbox" name="pruning" />
-                        <label for="sync">Disable Message Pruning</label>
+                        <a href="javascript:void(0);" id="messagePruningLink" onclick="showPopup('message-pruning')">
+                            <label for="pruning" style="color:rgb(0, 157, 255); font-weight: normal;">Disable Message Pruning*</label>
+                        </a>
                     </div>
                 </div>
                 <div class="form_col">
@@ -224,6 +338,12 @@
                             <option value="3">Small</option>
                             <option value="4" selected>Default</option>
                             <option value="5">Thick</option>
+                        </select>
+                    </div>
+                    <div class="form_row right" style="opacity: 0; pointer-events: none">
+                        <label for="placeholder">placeholder</label>
+                        <select name="placeholder">
+                            <option value="1" selected>placeholder</option>
                         </select>
                     </div>
                     <br />
@@ -485,6 +605,19 @@
             <a href="https://www.twitch.tv/" target="_blank">Twitch</a>
         </p>
     </footer>
+
+    <!-- Hidden content templates for popups -->
+    <div id="emote-sync-content" style="display:none;">
+        <p>Tries to keep all emotes in sync with each other and on the same loop timing.</p>
+    </div>
+
+    <div id="message-pruning-content" style="display:none;">
+        <p>Automatically removes messages that pass the top of the screen. Increases performance and IMO makes chat look nicer.</p>
+        <br>
+        <p>To see effect in OBS make sure not to crop the top of the browser source.</p>
+        <br>
+        <p>Potential downside: A very short chat size has the potential to clear any new message that is too long.</p>
+    </div>
 </body>
 
 </html>
