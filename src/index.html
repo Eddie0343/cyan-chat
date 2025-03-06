@@ -26,6 +26,7 @@
     <script src="syncEmotes.js"></script>
     <script src="styles.js"></script>
     <script src="script.js" defer></script>
+    <script src="./v2/tinycolor.js"></script>
 
     <style>
         /* Additional animations for form transitions */
@@ -345,6 +346,10 @@
                                     <option value="Raveena">Raveena (Indian)</option>
                                 </select>
                             </div>
+                            <div class="form-field message-image-field">
+                                <label for="message_image">SMS Image URL</label>
+                                <input type="text" name="message_image" placeholder="URLs for SMS corner images comma separated (optional)" class="standardized-width" />
+                            </div>
                         </div>
 
                         <div class="form_col" style="align-items: end; flex: 20%;">
@@ -394,8 +399,12 @@
                                     <input type="checkbox" name="invert" id="invert" />
                                 </div>
                                 <div class="checkbox-row" data-tooltip="Similar to StreamLabs chat widget">
-                                    <label for="center">Center Layout</label>
+                                    <label for="center">Center Theme</label>
                                     <input type="checkbox" name="center" id="center" />
+                                </div>
+                                <div class="checkbox-row" data-tooltip="SMS-style chat bubble layout">
+                                    <label for="sms">SMS Theme</label>
+                                    <input type="checkbox" name="sms" id="sms" />
                                 </div>
                                 <div class="checkbox-row" data-tooltip="Click for more info">
                                     <label for="sync">

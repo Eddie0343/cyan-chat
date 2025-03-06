@@ -266,13 +266,123 @@ function capsUpdate(event) {
     }
 }
 
+function applyPreviewSMSTheme() {
+    // Apply colors to the preview elements
+    $("#example .chat_line").each(function() {
+        const $chatLine = $(this);
+        const $userInfo = $chatLine.find('.user_info');
+        const $message = $chatLine.find('.message');
+        const $nick = $userInfo.find('.nick');
+        
+        // Get user color
+        let color = $nick.css('color');
+        
+        // If color is transparent, try to get color from next nick element
+        if (color === 'transparent' || color === 'rgba(0, 0, 0, 0)') {
+            const $nextNick = $nick.next('.nick');
+            if ($nextNick.length) {
+            color = $nextNick.css('color');
+            }
+        }
+        
+        // Create desaturated background for message
+        const hsl = tinycolor(color).toHsl();
+        hsl.s = 0.5;
+        hsl.l = 0.9;
+        const lightColor = tinycolor(hsl).toString();
+        
+        // Apply styles
+        $userInfo.css('backgroundColor', color);
+        $message.css('backgroundColor', lightColor);
+        $message[0].style.setProperty('--arrow-color', lightColor);
+
+        emotes = $messageImage.val().split(",");
+        if (emotes.length == 0) {
+            emotes = ["https://cdn.7tv.app/emote/60ae7316f7c927fad14e6ca2/4x.webp"];
+        }
+        emote = emotes[Math.floor(Math.random() * emotes.length)];
+        
+        // Add example message image
+        if (!$message.find('.message-image').length) {
+            const imageUrl = emote || 'https://cdn.7tv.app/emote/60ae7316f7c927fad14e6ca2/4x.webp';
+            const $img = $('<img>', {
+                src: imageUrl,
+                class: 'message-image',
+                alt: ''
+            });
+            $message.append($img);
+        }
+    });
+
+    applyStyles("variant_sms", sms);
+}
+
+// Remove SMS theme from preview
+function removePreviewSMSTheme() {
+    removeStyles("variant_sms");
+    $("#example .chat_line").each(function() {
+        const $chatLine = $(this);
+        const $userInfo = $chatLine.find('.user_info');
+        const $message = $chatLine.find('.message');
+        const $nick = $userInfo.find('.nick');
+        $userInfo.css('backgroundColor', '');
+        $message.css('backgroundColor', '');
+        $message[0].style.setProperty('--arrow-color', '');
+    });
+    
+    // Remove images
+    $("#example .message-image").remove();
+}
+
+function smsUpdate(event) {
+    if ($sms.is(":checked")) {
+        $('span[class="nick paint"]').addClass("nopaint");
+        $('span[class="mention paint"]').addClass("nopaint");
+        // Disable center option 
+        $center.prop("disabled", true);
+        if ($center.is(":checked")) {
+            $center.prop("checked", false);
+            removeStyles("variant_center");
+        }
+        
+        // Apply SMS styling to preview
+        applyPreviewSMSTheme();
+    } else {
+        $('span[class="nick paint nopaint"]').removeClass("nopaint");
+        $('span[class="mention paint nopaint"]').removeClass("nopaint");
+        // Enable center option
+        $center.prop("disabled", false);
+        
+        // Remove SMS styling from preview
+        removePreviewSMSTheme();
+    }
+}
+
 function centerUpdate(event) {
     if ($center.is(":checked")) {
+        // Disable SMS option
+        $sms.prop("disabled", true);
+        if ($sms.is(":checked")) {
+            $sms.prop("checked", false);
+            $(".message-image-field").slideUp();
+            removePreviewSMSTheme();
+        }
+        
         colonUpdate();
         $('span[class="colon"]').css("display", "none");
-        appendCSS("variant", "center");
+        applyStyles("variant_center", 
+            ".message { width: 45%; display: block; padding-left: 1em; }\n" +
+            ".user_info { width: 50%; text-align: right; }\n" +
+            ".nick { text-overflow: ellipsis; overflow: hidden; max-width: 60%; display: inline-block; white-space: nowrap; padding-left: 5px; vertical-align: bottom; }\n" +
+            ".colon { display: none; }\n" +
+            ".chat_line { display: flex; }\n" +
+            ".message .emote { vertical-align: top; }"
+        );
     } else {
-        removeCSS("variant", "center");
+        // Enable SMS option
+        $sms.prop("disabled", false);
+        
+        removeStyles("variant_center");
         $('span[class="colon"]').css("display", "inline");
         colonUpdate();
     }
@@ -283,95 +393,6 @@ function syncUpdate(event) {
         showPopup('emote-sync');
     }
 }
-
-// function generateURL(event) {
-//     event.preventDefault();
-
-//     const baseUrl = window.location.href;
-//     const url = new URL(baseUrl);
-//     let currentUrl = url.origin + url.pathname;
-//     currentUrl = currentUrl.replace(/\/+$/, "");
-
-//     var generatedUrl = "";
-//     if ($regex.val() == "") {
-//         generatedUrl = currentUrl + "/v2/?channel=" + $channel.val();
-//     } else {
-//         generatedUrl =
-//             currentUrl +
-//             "/v2/?channel=" +
-//             $channel.val() +
-//             "&regex=" +
-//             encodeURIComponent($regex.val());
-//     }
-
-//     var selectedFont;
-//     if (fonts[Number($font.val())] == "Custom") {
-//         selectedFont = $custom_font.val();
-//     } else {
-//         selectedFont = $font.val();
-//     }
-
-//     let data = {
-//         size: $size.val(),
-//         emoteScale: $emoteScale.val(),
-//         font: selectedFont,
-//         height: $height.val(),
-//         voice: $voice.val(),
-//         stroke: $stroke.val() != "0" ? $stroke.val() : false,
-//         weight: $weight.val() != "4" ? $weight.val() : false,
-//         shadow: $shadow.val() != "0" ? $shadow.val() : false,
-//         bots: $bots.is(":checked"),
-//         hide_commands: $commands.is(":checked"),
-//         hide_badges: $badges.is(":checked"),
-//         hide_paints: $paints.is(":checked"),
-//         hide_colon: $colon.is(":checked"),
-//         animate: $animate.is(":checked"),
-//         fade: $fade_bool.is(":checked") ? $fade.val() : false,
-//         small_caps: $small_caps.is(":checked"),
-//         invert: $invert.is(":checked"),
-//         center: $center.is(":checked"),
-//         readable: $readable.is(":checked"),
-//         disable_sync: $sync.is(":checked"),
-//         disable_pruning: $pruning.is(":checked"),
-//         block: $blockedUsers.val().replace(/\s+/g, ""),
-//         yt: $ytChannel.val().replace('@', ''),
-//     };
-
-//     const params = encodeQueryData(data);
-
-//     $url.val(generatedUrl + "&" + params);
-
-//     $generator.addClass("hidden");
-//     $result.removeClass("hidden");
-// }
-
-// function copyUrl(event) {
-//     navigator.clipboard.writeText($url.val());
-
-//     $alert.css({
-//         "visibility": "visible",
-//         "opacity": "1", 
-//         "transform": "translateY(0)" 
-//     });
-    
-//     // Add animation to the alert
-//     $alert.css("animation", "justFadeIn 0.3s");
-    
-//     setTimeout(() => {
-//         showUrl();
-//     }, 2000);
-// }
-
-// function showUrl(event) {
-//     $alert.css({
-//         "opacity": "0",
-//         "transform": "translateY(-10px)"
-//     });
-    
-//     setTimeout(function () {
-//         $alert.css("visibility", "hidden");
-//     }, 300);
-// }
 
 function resetForm(event) {
     $channel.val("");
@@ -403,6 +424,8 @@ function resetForm(event) {
     $sync.prop("checked", false);
     $pruning.prop("checked", false);
     $custom_font.prop("disabled", true);
+    $sms.prop("checked", false);
+    $messageImage.val("");
 
     sizeUpdate();
     fontUpdate();
@@ -415,6 +438,7 @@ function resetForm(event) {
     colonUpdate();
     capsUpdate();
     centerUpdate();
+    smsUpdate();
 
     $result.addClass("hidden");
     $generator.removeClass("hidden");
@@ -663,6 +687,8 @@ function generateURL(event) {
         disable_pruning: $pruning.is(":checked"),
         block: $blockedUsers.val().replace(/\s+/g, ""),
         yt: $ytChannel.val().replace('@', ''),
+        sms: $sms.is(":checked"),
+        message_image: $sms.is(":checked") ? $messageImage.val() : false,
     };
 
     const params = encodeQueryData(data);
@@ -749,6 +775,8 @@ const $reset = $("#reset");
 const $goBack = $("#go-back");
 const $regex = $('input[name="regex"]');
 const $blockedUsers = $('input[name="blocked_users"]');
+const $sms = $('input[name="sms"]');
+const $messageImage = $('input[name="message_image"]');
 
 $fade_bool.change(fadeOption);
 $size.change(sizeUpdate);
@@ -770,3 +798,4 @@ $alert.click(showUrl);
 $reset.click(resetForm);
 $goBack.click(backToForm);
 $sync.change(syncUpdate);
+$sms.change(smsUpdate);
