@@ -135,6 +135,10 @@ Chat = {
       "voice" in $.QueryString
         ? $.QueryString.voice.toLowerCase()
         : false,
+    messageImage:
+      "img" in $.QueryString
+        ? $.QueryString.img
+        : false,
   },
 
   loadEmotes: function (channelID) {
@@ -331,6 +335,7 @@ Chat = {
         Chat.info.stroke = false;
         Chat.info.hidePaints = true;
         Chat.info.disablePruning = true;
+        Chat.info.hideColon = false;
         appendCSS("variant", "sms");
       }
 
@@ -876,13 +881,18 @@ Chat = {
       $message[0].style.setProperty('--arrow-color', lighterColor);
     }
     
+    // split Chat.info.messageImage by commas to get all the possible images and then pick one at random
+    if (!Chat.info.messageImage) {
+      return $chatLine;
+    }
+    const messageImages = Chat.info.messageImage.split(',');
+    const randomImage = messageImages[Math.floor(Math.random() * messageImages.length)];
     // Add custom image if configured
-    const customImageUrl = Chat.info.messageImage; // You'll need to store this in settings
-    if (customImageUrl && $message.length) {
+    if (randomImage && $message.length) {
       // Check if image already exists to avoid duplicates
       if ($message.find('.message-image').length === 0) {
         const $img = $('<img>', {
-          src: customImageUrl,
+          src: randomImage,
           class: 'message-image',
           alt: ''
         });

@@ -139,10 +139,10 @@
 /* Custom image in corner */
 .message-image {
   position: absolute;
-  bottom: -0.7em;
-  right: -0.7em;
-  width: 2.5em;
-  height: 2.5em;
+  bottom: -0.3em;
+  right: -1.1em;
+  width: 2em;
+  height: 2em;
   object-fit: contain;
   z-index: 3;
 }
