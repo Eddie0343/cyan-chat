@@ -52,6 +52,10 @@ const popup = {
         'message-pruning': {
             title: 'Message Pruning',
             contentId: 'message-pruning-content'
+        },
+        'sms-theme': {
+            title: 'SMS Theme',
+            contentId: 'sms-theme-content'
         }
     },
     
@@ -284,6 +288,13 @@ function applyPreviewSMSTheme() {
             color = $nextNick.css('color');
             }
         }
+
+        var colorIsReadable = tinycolor.isReadable("#ffffff", tinycolor(color), {});
+        var darkerColor = tinycolor(color);
+        while (!colorIsReadable) {
+            darkerColor = darkerColor.darken(5);
+            colorIsReadable = tinycolor.isReadable("#ffffff", darkerColor, {});
+        }
         
         // Create desaturated background for message
         const hsl = tinycolor(color).toHsl();
@@ -292,19 +303,19 @@ function applyPreviewSMSTheme() {
         const lightColor = tinycolor(hsl).toString();
         
         // Apply styles
-        $userInfo.css('backgroundColor', color);
+        $userInfo.css('backgroundColor', darkerColor);
         $message.css('backgroundColor', lightColor);
         $message[0].style.setProperty('--arrow-color', lightColor);
 
         emotes = $messageImage.val().split(",");
         if (emotes.length == 0) {
-            emotes = ["https://cdn.7tv.app/emote/60ae7316f7c927fad14e6ca2/4x.webp"];
+            emotes = ["https://cdn.7tv.app/emote/01GAZ199Z8000FEWHS6AT5QZV0/4x.webp"];
         }
         emote = emotes[Math.floor(Math.random() * emotes.length)];
         
         // Add example message image
         if (!$message.find('.message-image').length) {
-            const imageUrl = emote || 'https://cdn.7tv.app/emote/60ae7316f7c927fad14e6ca2/4x.webp';
+            const imageUrl = emote || 'https://cdn.7tv.app/emote/01GAZ199Z8000FEWHS6AT5QZV0/4x.webp';
             const $img = $('<img>', {
                 src: imageUrl,
                 class: 'message-image',
@@ -336,20 +347,49 @@ function removePreviewSMSTheme() {
 
 function smsUpdate(event) {
     if ($sms.is(":checked")) {
-        $('span[class="nick paint"]').addClass("nopaint");
-        $('span[class="mention paint"]').addClass("nopaint");
         // Disable center option 
         $center.prop("disabled", true);
         if ($center.is(":checked")) {
             $center.prop("checked", false);
             removeStyles("variant_center");
         }
+
+        // Disable paints and force them off for SMS theme
+        $paints.prop("disabled", true);
+        $paints.prop("checked", true);
+        paintsUpdate();
+        
+        // Disable colon option and force it off
+        $colon.prop("disabled", true);
+        $colon.prop("checked", false);
+        colonUpdate();
+        
+        // Disable invert option and ensure it's off
+        $invert.prop("disabled", true);
+        $invert.prop("checked", false);
+        
+        // Disable stroke and set to 0
+        $stroke.prop("disabled", true);
+        $stroke.val("0");
+        strokeUpdate();
+        
+        // Disable shadow and set to 0
+        $shadow.prop("disabled", true);
+        $shadow.val("0");
+        shadowUpdate();
         
         // Apply SMS styling to preview
         applyPreviewSMSTheme();
     } else {
-        $('span[class="nick paint nopaint"]').removeClass("nopaint");
-        $('span[class="mention paint nopaint"]').removeClass("nopaint");
+        $center.prop("disabled", false);
+        $paints.prop("disabled", false);
+        $colon.prop("disabled", false);
+        $invert.prop("disabled", false);
+        $stroke.prop("disabled", false);
+        $shadow.prop("disabled", false);
+        $paints.prop("checked", false);
+        paintsUpdate();
+
         // Enable center option
         $center.prop("disabled", false);
         

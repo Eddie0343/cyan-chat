@@ -347,7 +347,7 @@
                                 </select>
                             </div>
                             <div class="form-field message-image-field">
-                                <label for="message_image">SMS Image URL</label>
+                                <label for="message_image">SMS Image URLs</label>
                                 <input type="text" name="message_image" placeholder="URLs for SMS corner images comma separated (optional)" class="standardized-width" />
                             </div>
                         </div>
@@ -402,8 +402,10 @@
                                     <label for="center">Center Theme</label>
                                     <input type="checkbox" name="center" id="center" />
                                 </div>
-                                <div class="checkbox-row" data-tooltip="SMS-style chat bubble layout">
-                                    <label for="sms">SMS Theme</label>
+                                <div class="checkbox-row" data-tooltip="Click for more info">
+                                    <label for="sms">
+                                        <a href="javascript:void(0);" onclick="showPopup('sms-theme')" style="color:var(--primary);">SMS Theme*</a>
+                                    </label>
                                     <input type="checkbox" name="sms" id="sms" />
                                 </div>
                                 <div class="checkbox-row" data-tooltip="Click for more info">
@@ -694,6 +696,16 @@
         <p>To see effect in OBS make sure not to crop the top of the browser source.</p>
         <br>
         <p>Potential downside: A very short chat size has the potential to clear any new message that is too long.</p>
+    </div>
+
+    <div id="sms-theme-content" style="display:none;">
+        <p>A cute SMS chat bubble styled theme that includes its own custom animations</p>
+        <br>
+        <p>Because this makes messages taller I recommend setting a fairly low fade time like 5s</p>
+        <br>
+        <p>Also the image in the bottom right is optional, it's just shown in the preview so you can see how it'd look</p>
+        <br>
+        <p>Incompatible with 7tv paints, text stroke, text shadow, center theme, and mention colors. This is due to readability on dynamically colored backgrounds.</p>
     </div>
 </body>
 
