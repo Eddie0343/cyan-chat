@@ -142,3 +142,18 @@ body {
   animation-duration: 0.2s;
   animation-timing-function: ease-in-out;
 }
+
+/* Large emotes for emote-only messages */
+.emote-only {
+  text-align: center;
+}
+
+.emote-only .large-emote {
+  vertical-align: middle;
+}
+
+/* Ensure large emotes in SMS theme work properly */
+.message .large-emote {
+  max-height: 2.2em;
+  max-width: 6.6em;
+}

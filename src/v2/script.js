@@ -135,6 +135,10 @@ Chat = {
       "voice" in $.QueryString
         ? $.QueryString.voice.toLowerCase()
         : false,
+    bigSoloEmotes:
+      "big_emotes" in $.QueryString
+        ? $.QueryString.big_emotes.toLowerCase() === "true"
+        : false,
     messageImage:
       "img" in $.QueryString
         ? $.QueryString.img
@@ -1276,6 +1280,28 @@ Chat = {
       message = twemoji.parse(message);
       $message.html(message);
 
+      if (Chat.info.bigSoloEmotes) {
+        // Clone the message content for checking
+        const $messageClone = $('<div>').html($message.html());
+        
+        // Remove all emote images
+        const emotes = $messageClone.find('img.emote, img.emoji');
+        const emoteCount = emotes.length;
+        emotes.remove();
+        
+        // Check if there's any text content left after removing emotes
+        const remainingText = $messageClone.text().trim();
+        
+        // If no text and we have emotes, this is an emote-only message
+        if (remainingText === '' && emoteCount > 0) {
+          // Add a class to the message for styling
+          $message.addClass('emote-only');
+          
+          // Find all emotes and add the large class
+          $message.find('img.emote, img.emoji').addClass('large-emote');
+        }
+      }
+
       // Writing zero-width emotes
       var hasZeroWidth = false;
       messageNodes = $message.children();
@@ -1361,7 +1387,9 @@ Chat = {
       Chat.info.lines.push($chatLine.wrap("<div>").parent().html());
       if (hasZeroWidth) {
         // console.log("DEBUG Message with mentions and emotes before fixZeroWidth:", $message.html());
-        fixZeroWidthEmotes(info.id);
+        setTimeout(function() {
+            fixZeroWidthEmotes(info.id);
+        }, 500);
       }
     }
   },

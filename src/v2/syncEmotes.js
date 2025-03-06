@@ -4,6 +4,7 @@ const POLL_INTERVAL = 100; // Poll interval in milliseconds
 const SYNC_DELAY = 50; // Delay before synchronizing in milliseconds
 
 function setupAndSynchronizeAnimations(images) {
+    console.log("Emotes found, setting up and synchronizing animations...");
     const imagesToSync = [];
 
     images.forEach((img, index) => {
@@ -28,6 +29,7 @@ function setupAndSynchronizeAnimations(images) {
 }
 
 function synchronizeAnimations(images) {
+    console.log("Synchronizing animations...");
     images.forEach((img) => {
         const src = img.src;
         img.src = ""; // Force reload
@@ -38,6 +40,7 @@ function synchronizeAnimations(images) {
 }
 
 function startObservingChatContainer() {
+    console.log("Chat container found, observing...");
     const chatContainer = document.getElementById("chat_container");
     if (chatContainer) {
         const emoteObserver = new MutationObserver((mutations) => {

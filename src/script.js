@@ -428,6 +428,17 @@ function centerUpdate(event) {
     }
 }
 
+function bigEmoteUpdate(event) {
+    // look for all items with the class should-be-big and add the classes emote-only and large-emote
+    if ($bigEmotes.is(":checked")) {
+        $(".should-be-big").addClass("emote-only large-emote");
+        $(".should-be-big").removeClass("emote");
+    } else {
+        $(".should-be-big").removeClass("emote-only large-emote");
+        $(".should-be-big").addClass("emote");
+    }
+}
+
 function syncUpdate(event) {
     if (!$sync.is(":checked")) {
         showPopup('emote-sync');
@@ -729,6 +740,7 @@ function generateURL(event) {
         yt: $ytChannel.val().replace('@', ''),
         sms: $sms.is(":checked"),
         message_image: $sms.is(":checked") ? $messageImage.val() : false,
+        big_emotes: $bigEmotes.is(":checked"),
     };
 
     const params = encodeQueryData(data);
@@ -817,6 +829,7 @@ const $regex = $('input[name="regex"]');
 const $blockedUsers = $('input[name="blocked_users"]');
 const $sms = $('input[name="sms"]');
 const $messageImage = $('input[name="message_image"]');
+const $bigEmotes = $('input[name="big_emotes"]');
 
 $fade_bool.change(fadeOption);
 $size.change(sizeUpdate);
@@ -839,3 +852,4 @@ $reset.click(resetForm);
 $goBack.click(backToForm);
 $sync.change(syncUpdate);
 $sms.change(smsUpdate);
+$bigEmotes.change(bigEmoteUpdate);
