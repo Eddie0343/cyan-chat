@@ -44,6 +44,10 @@ Chat = {
       "center" in $.QueryString
         ? $.QueryString.center.toLowerCase() === "true"
         : false,
+    sms:
+      "sms" in $.QueryString
+        ? $.QueryString.sms.toLowerCase() === "true"
+        : false,
     showBots:
       "bots" in $.QueryString
         ? $.QueryString.bots.toLowerCase() === "true"
@@ -315,7 +319,19 @@ Chat = {
       if (Chat.info.center) {
         Chat.info.animate = false;
         Chat.info.invert = false;
+        Chat.info.sms = false;
         appendCSS("variant", "center");
+      } 
+      
+      if (Chat.info.sms) {
+        Chat.info.center = false;
+        Chat.info.animate = false;
+        Chat.info.invert = false;
+        Chat.info.shadow = 0;
+        Chat.info.stroke = false;
+        Chat.info.hidePaints = true;
+        Chat.info.disablePruning = true;
+        appendCSS("variant", "sms");
       }
 
       appendCSS("size", size);
@@ -538,11 +554,24 @@ Chat = {
       } else {
         var messageTime = $(".chat_line").eq(0).data("time");
         if ((Date.now() - messageTime) / 1000 >= Chat.info.fade) {
-          $(".chat_line")
-            .eq(0)
-            .fadeOut(function () {
-              $(this).remove();
-            });
+          if (Chat.info.sms) {
+            // Store a reference to the specific element we want to remove
+            var $elementToRemove = $(".chat_line").eq(0);
+            // we first need to add the .fading-out class to the chat_line
+            $elementToRemove.addClass("fading-out");
+            // then we need to wait for the animation to finish
+            setTimeout(function () {
+              // then we can remove the chat_line
+              $elementToRemove.remove();
+            }, 700);
+          } else {
+            var $elementToRemove = $(".chat_line").eq(0);
+            $elementToRemove
+              .eq(0)
+              .fadeOut(function () {
+                $(this).remove();
+              });
+          }
         }
       }
     }
@@ -797,6 +826,72 @@ Chat = {
         // console.error("Error fetching paint info:", error);
       }
     })();
+  },
+
+  getAlmostWhiteColor: function (color) {
+    // Create a tinycolor object from the input color
+    const baseColor = tinycolor(color);
+    
+    // First desaturate the color (to reduce color intensity)
+    // Then lighten it significantly (to make it almost white)
+    return baseColor
+      .desaturate(85)   // Reduce saturation by 85%
+      .lighten(80)      // Lighten by 80%
+      .toString();      // Convert back to string format
+  },
+
+  applySMSTheme: function (chatLine, color) {
+    // Convert to jQuery object if it's a DOM element
+    const $chatLine = $(chatLine);
+
+    var colorIsReadable = tinycolor.isReadable("#ffffff", tinycolor(color), {});
+    var darkerColor = tinycolor(color);
+    while (!colorIsReadable) {
+      darkerColor = darkerColor.darken(5);
+      colorIsReadable = tinycolor.isReadable("#ffffff", darkerColor, {});
+    }
+    
+    // Get RGB values from the color
+    // const userColor = tinycolor(color);
+    // Create a lighter version (40% lighter)
+    var hsl = tinycolor(color).toHsl();
+    if (hsl.s < 0.1) {
+      hsl.s = 0;
+    } else {
+      hsl.s = 50 / 100; // Convert percentage to [0,1] range
+    }
+    hsl.l = 90 / 100; // Convert percentage to [0,1] range
+    var lighterColor = tinycolor(hsl).toString();
+    
+    // Apply colors directly to elements using jQuery methods
+    const $userInfo = $chatLine.find('.user_info');
+    const $message = $chatLine.find('.message');
+    
+    // Set background colors
+    $userInfo.css('backgroundColor', darkerColor);
+    $message.css('backgroundColor', lighterColor);
+    
+    // Set the CSS variable using native DOM API for better compatibility
+    if ($message.length) {
+      $message[0].style.setProperty('--arrow-color', lighterColor);
+    }
+    
+    // Add custom image if configured
+    const customImageUrl = Chat.info.messageImage; // You'll need to store this in settings
+    if (customImageUrl && $message.length) {
+      // Check if image already exists to avoid duplicates
+      if ($message.find('.message-image').length === 0) {
+        const $img = $('<img>', {
+          src: customImageUrl,
+          class: 'message-image',
+          alt: ''
+        });
+        $message.append($img);
+      }
+    }
+    
+    // Return the jQuery object
+    return $chatLine;
   },
 
   write: function (nick, info, message, service) {
@@ -1204,7 +1299,7 @@ Chat = {
             // console.log(Chat.info.seventvPaints[username].length);
             var $mention = $(`<span class="mention">${word}</span>`);
             // console.log(Chat.info.seventvPaints);
-            if (Chat.info.seventvPaints[username] && Chat.info.seventvPaints[username].length > 0) {
+            if (Chat.info.seventvPaints[username] && Chat.info.seventvPaints[username].length > 0 && !hidePaints) {
               console.log(`Found paint for ${username}: ${Chat.info.seventvPaints[username]}`);
               // $mentionCopy = $mention.clone();
               // $mentionCopy.css("position", "absolute");
@@ -1250,6 +1345,9 @@ Chat = {
       $message.html(message);
 
       $chatLine.append($message);
+      if (Chat.info.sms) {
+        $chatLine = Chat.applySMSTheme($chatLine, color);
+      }
       Chat.info.lines.push($chatLine.wrap("<div>").parent().html());
       if (hasZeroWidth) {
         // console.log("DEBUG Message with mentions and emotes before fixZeroWidth:", $message.html());
