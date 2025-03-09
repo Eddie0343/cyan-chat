@@ -1335,7 +1335,7 @@ Chat = {
             // console.log(Chat.info.seventvPaints[username].length);
             var $mention = $(`<span class="mention">${word}</span>`);
             // console.log(Chat.info.seventvPaints);
-            if (Chat.info.seventvPaints[username] && Chat.info.seventvPaints[username].length > 0 && !hidePaints) {
+            if (Chat.info.seventvPaints[username] && Chat.info.seventvPaints[username].length > 0 && !Chat.info.hidePaints) {
               console.log(`Found paint for ${username}: ${Chat.info.seventvPaints[username]}`);
               // $mentionCopy = $mention.clone();
               // $mentionCopy.css("position", "absolute");
