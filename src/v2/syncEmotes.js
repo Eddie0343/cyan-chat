@@ -30,11 +30,41 @@ function setupAndSynchronizeAnimations(images) {
 
 function synchronizeAnimations(images) {
     console.log("Synchronizing animations...");
+    
+    // First, store all original dimensions
+    images.forEach((img) => {
+        // Save original dimensions
+        if (img.width > 0 && img.height > 0) {
+            img.setAttribute('data-original-width', img.width);
+            img.setAttribute('data-original-height', img.height);
+        }
+        
+        // Create a placeholder style to maintain size
+        const width = img.width || img.offsetWidth;
+        const height = img.height || img.offsetHeight;
+        
+        if (width > 0 && height > 0) {
+            img.style.width = `${width}px`;
+            img.style.height = `${height}px`;
+        }
+    });
+    
+    // Then reload images
     images.forEach((img) => {
         const src = img.src;
         img.src = ""; // Force reload
         setTimeout(() => {
             img.src = src;
+            
+            // Cleanup function to remove fixed dimensions after load
+            img.addEventListener('load', function onReload() {
+                img.removeEventListener('load', onReload);
+                // Remove the fixed dimensions after a small delay to ensure smoothness
+                setTimeout(() => {
+                    img.style.width = '';
+                    img.style.height = '';
+                }, 50);
+            });
         }, 0);
     });
 }
