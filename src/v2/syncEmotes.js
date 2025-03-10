@@ -49,23 +49,34 @@ function synchronizeAnimations(images) {
         }
     });
     
-    // Then reload images
-    images.forEach((img) => {
-        const src = img.src;
-        img.src = ""; // Force reload
-        setTimeout(() => {
-            img.src = src;
+    // Generate a unique cache-busting parameter
+    const cacheBuster = Date.now();
+    
+    // Preload all images with the new cache-busting parameter
+    const preloadPromises = images.map(img => {
+        return new Promise((resolve) => {
+            const originalSrc = img.src;
+            const separator = originalSrc.includes('?') ? '&' : '?';
+            const newSrc = `${originalSrc}${separator}_sync=${cacheBuster}`;
             
-            // Cleanup function to remove fixed dimensions after load
-            img.addEventListener('load', function onReload() {
-                img.removeEventListener('load', onReload);
-                // Remove the fixed dimensions after a small delay to ensure smoothness
-                setTimeout(() => {
-                    img.style.width = '';
-                    img.style.height = '';
-                }, 50);
-            });
-        }, 0);
+            // Create a new image element to preload
+            const preloadImg = new Image();
+            preloadImg.onload = () => resolve({ img, newSrc });
+            preloadImg.src = newSrc;
+        });
+    });
+    
+    // Once all images are preloaded, update the actual img elements
+    Promise.all(preloadPromises).then(results => {
+        results.forEach(({ img, newSrc }) => {
+            img.src = newSrc;
+            
+            // Remove the fixed dimensions after a small delay
+            setTimeout(() => {
+                img.style.width = '';
+                img.style.height = '';
+            }, 50);
+        });
     });
 }
 
