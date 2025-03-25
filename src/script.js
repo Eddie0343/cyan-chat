@@ -117,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAnimations();
     setupFormTransition();
     setupThemeToggle();
-    setupTooltips();
     
     // Initial application of styles
     applyStyles("size", sizes[2]);
@@ -452,12 +451,6 @@ function bigEmoteUpdate(event) {
     }
 }
 
-function syncUpdate(event) {
-    if (!$sync.is(":checked")) {
-        showPopup('emote-sync');
-    }
-}
-
 function resetForm(event) {
     $channel.val("");
     $ytChannel.val("");
@@ -643,21 +636,12 @@ function toggleTheme() {
     example.classList.toggle('white');
 }
 
-// Apply tooltip data attributes
-function setupTooltips() {
-  // Add tooltips to certain elements
-  document.querySelector('label[for="sync"]').closest('.form_row').setAttribute('data-tooltip', 'Keeps animated emotes in sync with each other');
-  document.querySelector('label[for="pruning"]').closest('.form_row').setAttribute('data-tooltip', 'Remove messages that scroll off-screen');
-  document.querySelector('label[for="readable"]').closest('.form_row').setAttribute('data-tooltip', 'Ensures text colors are readable');
-}
-
 // Initialize all the new UI enhancements
 document.addEventListener('DOMContentLoaded', function() {
   popup.init();
   initializeAnimations();
   setupFormTransition();
   setupThemeToggle();
-  setupTooltips();
   
   // Initial application of styles
   applyStyles("size", sizes[2]);
@@ -869,7 +853,6 @@ $url.click(copyUrl);
 $alert.click(showUrl);
 $reset.click(resetForm);
 $goBack.click(backToForm);
-$sync.change(syncUpdate);
 $sms.change(smsUpdate);
 $bigEmotes.change(bigEmoteUpdate);
 $disableTTS.change(commandsUpdate);

@@ -1224,7 +1224,7 @@ label {
 }
 
 /* Fix checkbox tooltip positioning */
-[data-tooltip].checkbox-row::after {
+[data-tooltip]label::after {
   bottom: auto;
   top: 125%;
 }
