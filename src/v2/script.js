@@ -129,7 +129,7 @@ Chat = {
         : false,
     yt:
       "yt" in $.QueryString
-        ? $.QueryString.yt.toLowerCase()
+        ? $.QueryString.yt.toLowerCase().replace("@", "")
         : false,
     voice:
       "voice" in $.QueryString
@@ -143,6 +143,10 @@ Chat = {
       "img" in $.QueryString
         ? $.QueryString.img
         : false,
+    disabledCommands:
+      "off_commands" in $.QueryString
+        ? $.QueryString.off_commands.toLowerCase().split(",")
+        : [],
   },
 
   loadEmotes: function (channelID) {
@@ -1568,6 +1572,7 @@ Chat = {
                   message.params[1].toLowerCase() === "!chatis rickroll") &&
                 typeof message.tags.badges === "string"
               ) {
+                if (Chat.info.disabledCommands.includes("rickroll")) return;
                 var flag = false;
                 message.tags.badges.split(",").forEach((badge) => {
                   badge = badge.split("/");
@@ -1619,6 +1624,7 @@ Chat = {
                 message.params[1].toLowerCase().startsWith("!chat tts") &&
                 typeof message.tags.badges === "string"
               ) {
+                if (Chat.info.disabledCommands.includes("tts")) return;
                 var flag = false;
                 message.tags.badges.split(",").forEach((badge) => {
                   badge = badge.split("/");

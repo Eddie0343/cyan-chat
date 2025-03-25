@@ -6,7 +6,7 @@ function delay(ms) {
 }
 
 // Generic retry function
-async function retry(fn, retries = 3, delayMs = 5000) {
+async function retry(fn, retries = 2, delayMs = 5000) {
   let attempt = 0;
   while (attempt < retries) {
     try {

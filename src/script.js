@@ -270,6 +270,19 @@ function capsUpdate(event) {
     }
 }
 
+var disabledCommands = [];
+function commandsUpdate(event) {
+    if ($disableTTS.is(":checked") && $disableRickroll.is(":checked")) {
+        disabledCommands = ["tts", "rickroll"];
+    } else if ($disableTTS.is(":checked")) {
+        disabledCommands = ["tts"];
+    } else if ($disableRickroll.is(":checked")) {
+        disabledCommands = ["rickroll"];
+    } else {
+        disabledCommands = [];
+    }
+}
+
 function applyPreviewSMSTheme() {
     // Apply colors to the preview elements
     $("#example .chat_line").each(function() {
@@ -477,6 +490,8 @@ function resetForm(event) {
     $custom_font.prop("disabled", true);
     $sms.prop("checked", false);
     $messageImage.val("");
+    $disableTTS.prop("checked", false);
+    $disableRickroll.prop("checked", false);
 
     sizeUpdate();
     fontUpdate();
@@ -490,6 +505,7 @@ function resetForm(event) {
     capsUpdate();
     centerUpdate();
     smsUpdate();
+    commandsUpdate();
 
     $result.addClass("hidden");
     $generator.removeClass("hidden");
@@ -741,6 +757,7 @@ function generateURL(event) {
         sms: $sms.is(":checked"),
         message_image: $sms.is(":checked") ? $messageImage.val() : false,
         big_emotes: $bigEmotes.is(":checked"),
+        off_commands: disabledCommands.join(","),
     };
 
     const params = encodeQueryData(data);
@@ -830,6 +847,8 @@ const $blockedUsers = $('input[name="blocked_users"]');
 const $sms = $('input[name="sms"]');
 const $messageImage = $('input[name="message_image"]');
 const $bigEmotes = $('input[name="big_emotes"]');
+const $disableTTS = $('input[name="disable_tts"]');
+const $disableRickroll = $('input[name="disable_rickroll"]');
 
 $fade_bool.change(fadeOption);
 $size.change(sizeUpdate);
@@ -853,3 +872,5 @@ $goBack.click(backToForm);
 $sync.change(syncUpdate);
 $sms.change(smsUpdate);
 $bigEmotes.change(bigEmoteUpdate);
+$disableTTS.change(commandsUpdate);
+$disableRickroll.change(commandsUpdate);
