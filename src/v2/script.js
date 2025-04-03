@@ -1050,13 +1050,74 @@ Chat = {
                 "url(" + paint.backgroundImage + ")"
               );
             }
-            $username.css("filter", paint.filter);
-            $username.addClass("paint");
+            let userShadow = "";
+            if (Chat.info.stroke) {
+              if (Chat.info.stroke === 1) {
+                userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+              } else if (Chat.info.stroke === 2) {
+                userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+              }
+            }
+            // Process paint.filter to handle large blur drop-shadows correctly
+            if (paint.filter) {
+              // Fix the regex to properly capture entire drop-shadow expressions including closing parenthesis
+              const dropShadows = paint.filter.match(/drop-shadow\([^)]*\)/g) || [];
+              const smallBlurShadows = [];
+              const largeBlurShadows = [];
+              
+              // Categorize drop-shadows based on blur radius
+              dropShadows.forEach(shadow => {
+                // Extract the blur radius (third value in px)
+                const blurMatch = shadow.match(/\d+(\.\d+)?px\s+\d+(\.\d+)?px\s+(\d+(\.\d+)?)px/);
+                if (blurMatch && parseFloat(blurMatch[3]) >= 1) {
+                  if (!shadow.endsWith("px)")) {
+                    shadow = shadow + ")";
+                  }
+                  largeBlurShadows.push(shadow);
+                } else {
+                  if (!shadow.endsWith("px)")) {
+                    shadow = shadow + ")";
+                  }
+                  smallBlurShadows.push(shadow);
+                }
+              });
+              
+              // Reconstruct filter with the correct order
+              // Small blur shadows + mentionShadow + large blur shadows
+              let finalFilter = '';
+              
+              if (smallBlurShadows.length > 0) {
+                finalFilter += smallBlurShadows.join(' ');
+              }
+              
+              if (userShadow) {
+                finalFilter += userShadow;
+              }
+              
+              if (largeBlurShadows.length > 0) {
+                finalFilter += ' ' + largeBlurShadows.join(' ');
+              }
+              
+              // Debug log to verify the filter string
+              console.log("Applied filter:", finalFilter);
+              $username.css("filter", finalFilter);
+              $username.addClass("paint");
+            }
             if (Chat.info.hidePaints) {
               $username.addClass("nopaint");
             }
           });
           $userInfo.append($usernameCopy);
+        } else {
+          let userShadow = "";
+          if (Chat.info.stroke) {
+            if (Chat.info.stroke === 1) {
+              userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+            } else if (Chat.info.stroke === 2) {
+              userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+            }
+          }
+          $username.css("filter", userShadow);
         }
       }
 
@@ -1428,6 +1489,23 @@ Chat = {
 
       // Finalize the message HTML
       $message.html(message);
+
+      // Wrap text nodes in .text-content spans
+      const wrapTextNodes = function($element) {
+        $element.contents().each(function() {
+          // If it's a text node and it's not just whitespace
+          if (this.nodeType === 3 && this.nodeValue.trim().length > 0) {
+            $(this).wrap('<span class="text-content"></span>');
+          } 
+          // If it's an element node, process its children recursively
+          else if (this.nodeType === 1 && !$(this).is('img, .emote, .emoji, .zero-width, .mention, .paint')) {
+            wrapTextNodes($(this));
+          }
+        });
+      };
+      
+      // Apply the text wrapping
+      wrapTextNodes($message);
 
       $chatLine.append($message);
       if (Chat.info.sms) {
