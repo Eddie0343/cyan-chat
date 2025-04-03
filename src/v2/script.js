@@ -1363,15 +1363,60 @@ Chat = {
                     mentionShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
                   }
                 }
-                console.log(paint.filter+mentionShadow);
-                $mention.css("filter", paint.filter+mentionShadow);
+                // Process paint.filter to handle large blur drop-shadows correctly
+                if (paint.filter) {
+                  // Fix the regex to properly capture entire drop-shadow expressions including closing parenthesis
+                  const dropShadows = paint.filter.match(/drop-shadow\([^)]*\)/g) || [];
+                  const smallBlurShadows = [];
+                  const largeBlurShadows = [];
+                  
+                  // Categorize drop-shadows based on blur radius
+                  dropShadows.forEach(shadow => {
+                    // Extract the blur radius (third value in px)
+                    const blurMatch = shadow.match(/\d+(\.\d+)?px\s+\d+(\.\d+)?px\s+(\d+(\.\d+)?)px/);
+                    if (blurMatch && parseFloat(blurMatch[3]) >= 1) {
+                      if (!shadow.endsWith("px)")) {
+                        shadow = shadow + ")";
+                      }
+                      largeBlurShadows.push(shadow);
+                    } else {
+                      if (!shadow.endsWith("px)")) {
+                        shadow = shadow + ")";
+                      }
+                      smallBlurShadows.push(shadow);
+                    }
+                  });
+                  
+                  // Reconstruct filter with the correct order
+                  // Small blur shadows + mentionShadow + large blur shadows
+                  let finalFilter = '';
+                  
+                  if (smallBlurShadows.length > 0) {
+                    finalFilter += smallBlurShadows.join(' ');
+                  }
+                  
+                  if (mentionShadow) {
+                    finalFilter += mentionShadow;
+                  }
+                  
+                  if (largeBlurShadows.length > 0) {
+                    finalFilter += ' ' + largeBlurShadows.join(' ');
+                  }
+                  
+                  // Debug log to verify the filter string
+                  console.log("Applied filter:", finalFilter);
+                  $mention.css("filter", finalFilter);
+                } else {
+                  $mention.css("filter", mentionShadow);
+                }
+                
                 $mention.addClass("paint");
               });
-              var mentionHtml =
-                // $mentionCopy[0].outerHTML + $mention[0].outerHTML;
-                $mention[0].outerHTML;
+              
+              var mentionHtml = $mention[0].outerHTML;
               return mentionHtml;
             }
+            
             if (Chat.info.colors[username]) {
               $mention.css("color", Chat.info.colors[username]);
               return $mention[0].outerHTML;
