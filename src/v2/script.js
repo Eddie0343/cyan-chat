@@ -1802,6 +1802,91 @@ Chat = {
               }
               // #endregion TTS
 
+              // #region YouTube Embed
+              if (
+                message.params[1].toLowerCase().startsWith("!chat ytplay") &&
+                typeof message.tags.badges === "string"
+              ) {
+                if (Chat.info.disabledCommands.includes("ytplay")) return;
+                var flag = false;
+                message.tags.badges.split(",").forEach((badge) => {
+                  badge = badge.split("/");
+                  if (badge[0] === "moderator" || badge[0] === "broadcaster") {
+                    flag = true;
+                    return;
+                  }
+                });
+                if (nick == "johnnycyan") flag = true;
+                if (flag) {
+                  // Parse command arguments
+                  const commandArgs = message.params[1].slice("!chat ytplay".length).trim();
+                  
+                  // Extract URL and parameters using regex
+                  const urlMatch = commandArgs.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s]+/i);
+                  if (!urlMatch) {
+                    console.log("Cyan Chat: No valid YouTube URL found in command");
+                    return;
+                  }
+                  
+                  const youtubeUrl = urlMatch[0];
+                  const remainingText = commandArgs.replace(youtubeUrl, "").trim();
+                  
+                  // Parse duration and start time parameters (-d for duration, -s for start time)
+                  let duration = 5; // Default duration in seconds
+                  let startTime = null; // Will be determined from URL or default to 0
+                  
+                  const durationMatch = remainingText.match(/-d\s+(\d+)/);
+                  if (durationMatch && durationMatch[1]) {
+                    duration = parseInt(durationMatch[1]);
+                  }
+                  
+                  const startMatch = remainingText.match(/-s\s+(\d+)/);
+                  if (startMatch && startMatch[1]) {
+                    startTime = parseInt(startMatch[1]);
+                  }
+                  
+                  // Extract video ID and process timestamp
+                  const videoId = extractYoutubeVideoId(youtubeUrl);
+                  if (!videoId) {
+                    console.log("Cyan Chat: Could not extract YouTube video ID");
+                    return;
+                  }
+                  
+                  const timestamp = extractYoutubeTimestamp(youtubeUrl, startTime);
+                  
+                  console.log(`Cyan Chat: Playing YouTube video ${videoId} starting at ${timestamp}s for ${duration}s`);
+                  // SendInfoText(`Playing YouTube video for ${duration} seconds`);
+                  
+                  embedYoutubeVideo(videoId, timestamp, duration);
+                  return;
+                }
+              }
+              // #endregion YouTube Embed
+
+              // #region YouTube Stop
+              if (
+                message.params[1].toLowerCase().startsWith("!chat ytstop") &&
+                typeof message.tags.badges === "string"
+              ) {
+                if (Chat.info.disabledCommands.includes("ytstop")) return;
+                var flag = false;
+                message.tags.badges.split(",").forEach((badge) => {
+                  badge = badge.split("/");
+                  if (badge[0] === "moderator" || badge[0] === "broadcaster") {
+                    flag = true;
+                    return;
+                  }
+                });
+                if (nick == "johnnycyan") flag = true;
+                if (flag) {
+                  console.log("Cyan Chat: Stopping YouTube embed");
+                  // SendInfoText("Stopping YouTube embed");
+                  removeCurrentMedia();
+                  return;
+                }
+              }
+              // #endregion YouTube Stop
+
               // #endregion COMMANDS
 
               if (Chat.info.hideCommands) {

@@ -271,15 +271,20 @@ function capsUpdate(event) {
 
 var disabledCommands = [];
 function commandsUpdate(event) {
-    if ($disableTTS.is(":checked") && $disableRickroll.is(":checked")) {
-        disabledCommands = ["tts", "rickroll"];
-    } else if ($disableTTS.is(":checked")) {
-        disabledCommands = ["tts"];
-    } else if ($disableRickroll.is(":checked")) {
-        disabledCommands = ["rickroll"];
-    } else {
-        disabledCommands = [];
-    }
+    disabledCommands = [];
+    const commandCheckboxes = {
+        'tts': $disableTTS,
+        'rickroll': $disableRickroll,
+        'ytplay': $disableYTPlay,
+        'ytstop': $disableYTStop
+    };
+    
+    // Iterate through all command checkboxes
+    Object.entries(commandCheckboxes).forEach(([command, $checkbox]) => {
+        if ($checkbox.is(":checked")) {
+            disabledCommands.push(command);
+        }
+    });
 }
 
 function applyPreviewSMSTheme() {
@@ -485,6 +490,8 @@ function resetForm(event) {
     $messageImage.val("");
     $disableTTS.prop("checked", false);
     $disableRickroll.prop("checked", false);
+    $disableYTPlay.prop("checked", false);
+    $disableYTStop.prop("checked", false);
 
     sizeUpdate();
     fontUpdate();
@@ -833,6 +840,8 @@ const $messageImage = $('input[name="message_image"]');
 const $bigEmotes = $('input[name="big_emotes"]');
 const $disableTTS = $('input[name="disable_tts"]');
 const $disableRickroll = $('input[name="disable_rickroll"]');
+const $disableYTPlay = $('input[name="disable_ytplay"]');
+const $disableYTStop = $('input[name="disable_ytstop"]');
 
 $fade_bool.change(fadeOption);
 $size.change(sizeUpdate);
@@ -857,3 +866,5 @@ $sms.change(smsUpdate);
 $bigEmotes.change(bigEmoteUpdate);
 $disableTTS.change(commandsUpdate);
 $disableRickroll.change(commandsUpdate);
+$disableYTPlay.change(commandsUpdate);
+$disableYTStop.change(commandsUpdate);

@@ -234,7 +234,7 @@ function findVideoFile(source) {
 
 function appendMedia(mediaType, source) {
   // Check if any video or audio element is already playing
-  const existingMedia = document.querySelector("video, audio");
+  const existingMedia = document.querySelector("video, audio, #youtube-embed-holder, iframe#youtube-embed");
 
   if (existingMedia) {
     console.log("A media file is already playing.");
@@ -557,3 +557,119 @@ makeActiveUserCall();
 setInterval(makeActiveUserCall, 2 * 60 * 1000);
 
 // #endregion Active User Call
+
+// Extract YouTube video ID from various URL formats
+function extractYoutubeVideoId(url) {
+  const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[7].length === 11) ? match[7] : null;
+}
+
+// Extract timestamp from YouTube URL or command parameter
+function extractYoutubeTimestamp(url, timeParam) {
+  // If explicit time parameter is provided, use that
+  if (timeParam !== null && !isNaN(timeParam)) {
+    return parseInt(timeParam);
+  }
+  
+  // Check for t or start parameter in URL
+  const regExpT = /[?&]t=(\d+)/;
+  const regExpStart = /[?&]start=(\d+)/;
+  const matchT = url.match(regExpT);
+  const matchStart = url.match(regExpStart);
+  
+  if (matchT && matchT[1]) {
+    return parseInt(matchT[1]);
+  } else if (matchStart && matchStart[1]) {
+    return parseInt(matchStart[1]);
+  }
+  
+  return 0; // Default start time
+}
+
+// Create YouTube embed and handle auto-removal
+function embedYoutubeVideo(videoId, startTime, duration) {
+  // Remove any existing media first
+  removeCurrentMedia();
+  
+  // Create a unique ID for this embed instance
+  const embedId = "youtube-embed-" + Date.now();
+  
+  // Add event listener to detect when video ends via postMessage
+  window.addEventListener("message", function onYouTubeMessage(event) {
+    // Verify message is from YouTube
+    if (event.origin.startsWith("https://www.youtube-nocookie.com") || event.origin.startsWith("https://www.youtube.com")) {
+      // console.log("Received message from YouTube, processing...");
+      // console.log(event.data);
+      try {
+        const data = JSON.parse(event.data);
+        // Check for video ended event (info.playerState === 0 means ended)
+        if (data.event === "infoDelivery" && data.info.currentTime > data.info.progressState.seekableEnd - 0.1 && data.info.videoLoadedFraction === 1) {
+          // Check if this is for our current embed
+          const currentEmbed = document.getElementById(embedId);
+          if (currentEmbed) {
+            console.log("YouTube video ended naturally, removing embed");
+            removeCurrentMedia();
+            // Remove this specific event listener
+            window.removeEventListener("message", onYouTubeMessage);
+          }
+        }
+      } catch (e) {
+        // Not a JSON message or other error, ignore
+      }
+    }
+  });
+
+  // Add API parameters to enable event sending
+  const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&iv_load_policy=3&loop=0&controls=0&modestbranding=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}&start=${startTime}`;
+  
+  const iframeHolder = document.createElement("div");
+  iframeHolder.style.position = "absolute";
+  iframeHolder.style.top = "50%";
+  iframeHolder.style.left = "50%";
+  iframeHolder.style.transform = "translate(-50%, -50%)";
+  iframeHolder.style.width = "100%";
+  iframeHolder.style.aspectRatio = "16/9"; // Maintain 16:9 aspect ratio
+  iframeHolder.style.maxHeight = "100%";
+  iframeHolder.style.border = "none";
+  iframeHolder.style.zIndex = "-100";
+  iframeHolder.style.pointerEvents = "none"; // Prevent interaction with the iframe
+  iframeHolder.style.overflow = "hidden"; // Hide overflow
+  iframeHolder.id = "youtube-embed-holder";
+
+  const iframe = document.createElement("iframe");
+  iframe.src = embedUrl;
+  iframe.style.width = "300%";
+  iframe.style.height = "100%";
+  iframe.style.marginLeft = "-100%";
+  iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+  iframe.id = embedId;
+  iframeHolder.appendChild(iframe);
+  
+  document.body.appendChild(iframeHolder);
+  
+  // Initialize the YouTube iframe
+  setTimeout(() => {
+    // Send a message to the iframe to initialize the API
+    const initMessage = JSON.stringify({
+      event: 'listening',
+      id: embedId
+    });
+    iframe.contentWindow.postMessage(initMessage, '*');
+  }, 1000);
+  
+  // Auto-remove after specified duration (in seconds)
+  if (duration > 0) {
+    setTimeout(() => {
+      removeCurrentMedia();
+    }, duration * 1000);
+  }
+}
+
+// Function to remove any currently playing media
+function removeCurrentMedia() {
+  const existingMedia = document.querySelector("video, audio, #youtube-embed-holder, iframe#youtube-embed");
+  if (existingMedia) {
+    existingMedia.remove();
+  }
+}
