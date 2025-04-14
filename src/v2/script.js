@@ -817,13 +817,22 @@ Chat = {
               }
             }
           } else {
-            var dropShadows = createDropShadows(seventvPaintInfo.shadows);
-            var userPaint = {
-              type: "image",
-              name: seventvPaintInfo.name,
-              backgroundImage: seventvPaintInfo.image_url,
-              filter: dropShadows,
-            };
+            if (seventvPaintInfo.shadows) {
+              var dropShadows = createDropShadows(seventvPaintInfo.shadows);
+              var userPaint = {
+                type: "image",
+                name: seventvPaintInfo.name,
+                backgroundImage: seventvPaintInfo.image_url,
+                filter: dropShadows,
+              };
+            } else {
+              var userPaint = {
+                type: "image",
+                name: seventvPaintInfo.name,
+                backgroundImage: seventvPaintInfo.image_url
+              };
+            }
+            
             if (Chat.info.seventvPaints[nick]) {
               if (!Chat.info.seventvPaints[nick].includes(userPaint)) {
                 Chat.info.seventvPaints[nick] = [];
@@ -1101,8 +1110,8 @@ Chat = {
               // Debug log to verify the filter string
               console.log("Applied filter:", finalFilter);
               $username.css("filter", finalFilter);
-              $username.addClass("paint");
             }
+            $username.addClass("paint");
             if (Chat.info.hidePaints) {
               $username.addClass("nopaint");
             }

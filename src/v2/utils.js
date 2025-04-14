@@ -603,12 +603,25 @@ function embedYoutubeVideo(videoId, startTime, duration) {
       // console.log(event.data);
       try {
         const data = JSON.parse(event.data);
+        // console.log(data.info.currentTime);
+        // console.log(startTime);
+        // console.log(duration);
+        // console.log(data.info.currentTime > (startTime + duration));
         // Check for video ended event (info.playerState === 0 means ended)
         if (data.event === "infoDelivery" && data.info.currentTime > data.info.progressState.seekableEnd - 0.1 && data.info.videoLoadedFraction === 1) {
           // Check if this is for our current embed
           const currentEmbed = document.getElementById(embedId);
           if (currentEmbed) {
             console.log("YouTube video ended naturally, removing embed");
+            removeCurrentMedia();
+            // Remove this specific event listener
+            window.removeEventListener("message", onYouTubeMessage);
+          }
+        } else if (data.event === "infoDelivery" && data.info.currentTime > (startTime + duration)) {
+          // Check if this is for our current embed
+          const currentEmbed = document.getElementById(embedId);
+          if (currentEmbed) {
+            console.log("YouTube video reached duration limit, removing embed");
             removeCurrentMedia();
             // Remove this specific event listener
             window.removeEventListener("message", onYouTubeMessage);
@@ -659,11 +672,11 @@ function embedYoutubeVideo(videoId, startTime, duration) {
   }, 1000);
   
   // Auto-remove after specified duration (in seconds)
-  if (duration > 0) {
-    setTimeout(() => {
-      removeCurrentMedia();
-    }, duration * 1000);
-  }
+  // if (duration > 0) {
+  //   setTimeout(() => {
+  //     removeCurrentMedia();
+  //   }, duration * 1000);
+  // }
 }
 
 // Function to remove any currently playing media
