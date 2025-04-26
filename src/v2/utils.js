@@ -617,7 +617,7 @@ function embedYoutubeVideo(videoId, startTime, duration) {
             // Remove this specific event listener
             window.removeEventListener("message", onYouTubeMessage);
           }
-        } else if (data.event === "infoDelivery" && data.info.currentTime > (startTime + duration)) {
+        } else if (duration > 0 && data.event === "infoDelivery" && data.info.currentTime > (startTime + duration)) {
           // Check if this is for our current embed
           const currentEmbed = document.getElementById(embedId);
           if (currentEmbed) {
