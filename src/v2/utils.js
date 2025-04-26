@@ -232,16 +232,15 @@ function findVideoFile(source) {
   });
 }
 
-function appendMedia(mediaType, source) {
-  // Check if any video or audio element is already playing
-  const existingMedia = document.querySelector("video, audio, #youtube-embed-holder, iframe#youtube-embed");
-
-  if (existingMedia) {
-    console.log("A media file is already playing.");
-    return;
-  }
-
+function appendMedia(mediaType, source, forceOnTop = false) {
   if (mediaType === "video") {
+    // Check if any video element is already playing (but allow audio to play alongside)
+    const existingVideo = document.querySelector("video, #youtube-embed-holder, iframe#youtube-embed");
+    if (existingVideo) {
+      console.log("A video is already playing. Cannot play multiple videos simultaneously.");
+      return;
+    }
+
     const video = document.createElement("video");
     video.src = source;
     video.style.position = "absolute";
@@ -251,7 +250,7 @@ function appendMedia(mediaType, source) {
     video.style.width = "100%";
     video.style.height = "100%";
     video.style.objectFit = "contain";
-    video.style.zIndex = -100;
+    video.style.zIndex = forceOnTop ? "100" : "-100"; // Set zIndex based on forceOnTop
     video.autoplay = true;
     video.muted = false;
     video.onended = function () {
@@ -260,14 +259,44 @@ function appendMedia(mediaType, source) {
 
     document.body.appendChild(video);
   } else if (mediaType === "audio") {
+    // Audio can play alongside video
     const audio = document.createElement("audio");
     audio.src = source;
     audio.autoplay = true;
     audio.onended = function () {
       audio.remove();
+      // Process the next TTS in queue if available
+      processNextTTS();
     };
 
     document.body.appendChild(audio);
+  } else if (mediaType === "image") {
+    const img = document.createElement("img");
+    img.src = source;
+    img.style.position = "absolute";
+    img.style.top = "0";
+    img.style.left = "0";
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "contain"; // Maintain aspect ratio while filling container
+    img.style.zIndex = forceOnTop ? "100" : "-50"; // Different z-index for images
+    img.id = "chat-image";
+    
+    // Add a container to help with positioning relative to chat_container
+    const container = document.createElement("div");
+    container.id = "chat-image-container";
+    container.style.position = "absolute";
+    container.style.top = "0";
+    container.style.left = "0";
+    container.style.width = "100%";
+    container.style.height = "100%";
+    container.style.zIndex = forceOnTop ? "100" : "-50";
+    container.style.pointerEvents = "none"; // Allow clicks to pass through
+    
+    container.appendChild(img);
+    document.body.appendChild(container);
+    
+    return container; // Return the container for duration handling
   }
 }
 
@@ -305,6 +334,70 @@ function playTTSAudio(text, voice) {
     .catch((error) => {
       console.log(`Error: ${error}`);
       cooldown += COOLDOWN;
+    });
+}
+
+// TTS Queue System
+let ttsQueue = [];
+let isTTSPlaying = false;
+
+function queueTTS(text, voice) {
+  console.log(`Queueing TTS: "${text}" with voice ${voice}`);
+  ttsQueue.push({ text, voice });
+  
+  // If nothing is playing, start the queue
+  if (!isTTSPlaying) {
+    processNextTTS();
+  }
+}
+
+function processNextTTS() {
+  // If the queue is empty or TTS is already playing, do nothing
+  if (ttsQueue.length === 0 || isTTSPlaying) {
+    return;
+  }
+  
+  // Mark as playing
+  isTTSPlaying = true;
+  
+  // Get the next item from the queue
+  const { text, voice } = ttsQueue.shift();
+  
+  console.log(`Playing TTS from queue: "${text}" with voice ${voice}`);
+  
+  // Play the TTS
+  fetch(`${API}?voice=${voice}&text=${encodeURIComponent(text)}`)
+    .then((response) => response.blob())
+    .then((blob) => {
+      if (!blob || !blob.size) {
+        throw new Error("No audio received");
+      }
+
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = document.createElement("audio");
+      audio.src = audioUrl;
+      audio.autoplay = true;
+      audio.onended = function () {
+        // Clean up
+        audio.remove();
+        isTTSPlaying = false;
+        
+        // Process the next item in the queue
+        processNextTTS();
+      };
+
+      audio.onerror = function() {
+        console.error("Error playing TTS audio");
+        isTTSPlaying = false;
+        processNextTTS(); // Try the next one
+      };
+
+      document.body.appendChild(audio);
+    })
+    .catch((error) => {
+      console.log(`Error: ${error}`);
+      isTTSPlaying = false;
+      processNextTTS(); // Try the next one
     });
 }
 
@@ -588,9 +681,9 @@ function extractYoutubeTimestamp(url, timeParam) {
 }
 
 // Create YouTube embed and handle auto-removal
-function embedYoutubeVideo(videoId, startTime, duration) {
-  // Remove any existing media first
-  removeCurrentMedia();
+function embedYoutubeVideo(videoId, startTime, duration, forceOnTop = false) {
+  // Remove any existing video media first (but leave audio alone)
+  removeCurrentMedia('video');
   
   // Create a unique ID for this embed instance
   const embedId = "youtube-embed-" + Date.now();
@@ -599,21 +692,15 @@ function embedYoutubeVideo(videoId, startTime, duration) {
   window.addEventListener("message", function onYouTubeMessage(event) {
     // Verify message is from YouTube
     if (event.origin.startsWith("https://www.youtube-nocookie.com") || event.origin.startsWith("https://www.youtube.com")) {
-      // console.log("Received message from YouTube, processing...");
-      // console.log(event.data);
       try {
         const data = JSON.parse(event.data);
-        // console.log(data.info.currentTime);
-        // console.log(startTime);
-        // console.log(duration);
-        // console.log(data.info.currentTime > (startTime + duration));
         // Check for video ended event (info.playerState === 0 means ended)
         if (data.event === "infoDelivery" && data.info.currentTime > data.info.progressState.seekableEnd - 0.1 && data.info.videoLoadedFraction === 1) {
           // Check if this is for our current embed
           const currentEmbed = document.getElementById(embedId);
           if (currentEmbed) {
             console.log("YouTube video ended naturally, removing embed");
-            removeCurrentMedia();
+            removeCurrentMedia('video');
             // Remove this specific event listener
             window.removeEventListener("message", onYouTubeMessage);
           }
@@ -622,7 +709,7 @@ function embedYoutubeVideo(videoId, startTime, duration) {
           const currentEmbed = document.getElementById(embedId);
           if (currentEmbed) {
             console.log("YouTube video reached duration limit, removing embed");
-            removeCurrentMedia();
+            removeCurrentMedia('video');
             // Remove this specific event listener
             window.removeEventListener("message", onYouTubeMessage);
           }
@@ -645,7 +732,7 @@ function embedYoutubeVideo(videoId, startTime, duration) {
   iframeHolder.style.aspectRatio = "16/9"; // Maintain 16:9 aspect ratio
   iframeHolder.style.maxHeight = "100%";
   iframeHolder.style.border = "none";
-  iframeHolder.style.zIndex = "-100";
+  iframeHolder.style.zIndex = forceOnTop ? "100" : "-100"; // Set z-index based on forceOnTop flag
   iframeHolder.style.pointerEvents = "none"; // Prevent interaction with the iframe
   iframeHolder.style.overflow = "hidden"; // Hide overflow
   iframeHolder.id = "youtube-embed-holder";
@@ -670,19 +757,28 @@ function embedYoutubeVideo(videoId, startTime, duration) {
     });
     iframe.contentWindow.postMessage(initMessage, '*');
   }, 1000);
-  
-  // Auto-remove after specified duration (in seconds)
-  // if (duration > 0) {
-  //   setTimeout(() => {
-  //     removeCurrentMedia();
-  //   }, duration * 1000);
-  // }
 }
 
-// Function to remove any currently playing media
-function removeCurrentMedia() {
-  const existingMedia = document.querySelector("video, audio, #youtube-embed-holder, iframe#youtube-embed");
-  if (existingMedia) {
-    existingMedia.remove();
+// Function to remove specific types of media
+function removeCurrentMedia(type = 'all') {
+  if (type === 'video' || type === 'all') {
+    const existingVideo = document.querySelector("video, #youtube-embed-holder, iframe#youtube-embed");
+    if (existingVideo) {
+      existingVideo.remove();
+    }
+  }
+  
+  if (type === 'audio' || type === 'all') {
+    const existingAudio = document.querySelector("audio");
+    if (existingAudio) {
+      existingAudio.remove();
+    }
+  }
+  
+  if (type === 'image' || type === 'all') {
+    const existingImage = document.querySelector("#chat-image");
+    if (existingImage) {
+      existingImage.remove();
+    }
   }
 }

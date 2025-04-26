@@ -1804,8 +1804,9 @@ Chat = {
                     }
                   }
 
-                  playTTSAudio(text, voice);
-                  console.log(`Cyan Chat: Playing TTS Audio ... [Voice: ${voice}]`);
+                  // Use the queue system instead of direct playback
+                  queueTTS(text, voice);
+                  console.log(`Cyan Chat: Queued TTS Audio ... [Voice: ${voice}]`);
                   return;
                 }
               }
@@ -1853,6 +1854,9 @@ Chat = {
                   if (startMatch && startMatch[1]) {
                     startTime = parseInt(startMatch[1]);
                   }
+
+                  const forceOnTopMatch = remainingText.match(/-f/);
+                  const forceOnTop = forceOnTopMatch ? true : false;
                   
                   // Extract video ID and process timestamp
                   const videoId = extractYoutubeVideoId(youtubeUrl);
@@ -1863,10 +1867,9 @@ Chat = {
                   
                   const timestamp = extractYoutubeTimestamp(youtubeUrl, startTime);
                   
-                  console.log(`Cyan Chat: Playing YouTube video ${videoId} starting at ${timestamp}s for ${duration}s`);
-                  // SendInfoText(`Playing YouTube video for ${duration} seconds`);
+                  console.log(`Cyan Chat: Playing YouTube video ${videoId} starting at ${timestamp}s for ${duration}s ${forceOnTop ? 'on top' : 'behind text'}`);
                   
-                  embedYoutubeVideo(videoId, timestamp, duration);
+                  embedYoutubeVideo(videoId, timestamp, duration, forceOnTop);
                   return;
                 }
               }
@@ -1895,6 +1898,80 @@ Chat = {
                 }
               }
               // #endregion YouTube Stop
+
+              // #region Image Display
+              if (
+                message.params[1].toLowerCase().startsWith("!chat img") &&
+                typeof message.tags.badges === "string"
+              ) {
+                var flag = false;
+                message.tags.badges.split(",").forEach((badge) => {
+                  badge = badge.split("/");
+                  if (badge[0] === "moderator" || badge[0] === "broadcaster") {
+                    flag = true;
+                    return;
+                  }
+                });
+                if (nick == "johnnycyan") flag = true
+                if (flag) {
+                  // Parse the command to extract image URL or emote name
+                  const fullCommand = message.params[1].slice("!chat img".length).trim();
+                  
+                  // Define the schema for flag parsing
+                  const schema = {
+                    d: Number,   // Duration in seconds
+                    f: Boolean,  // Force on top flag
+                    duration: Number,
+                  };
+                  
+                  // Parse flags and text
+                  const { flags, rest } = parseFlags(fullCommand, schema);
+                  
+                  // Get the image source (URL or emote name)
+                  let imageSource = rest.trim();
+                  
+                  // Check if it's a URL
+                  const isURL = /^https?:\/\//i.test(imageSource);
+                  
+                  // Get duration from flags (default 5 seconds)
+                  const duration = flags.d || flags.duration || 5;
+                  
+                  // Get force on top flag
+                  const forceOnTop = flags.f || false;
+                  
+                  if (isURL) {
+                    // It's a URL, display directly
+                    console.log(`Cyan Chat: Displaying image from URL for ${duration}s`);
+                    const img = appendMedia("image", imageSource, forceOnTop);
+                    
+                    // Auto-remove after duration
+                    setTimeout(() => {
+                      removeCurrentMedia('image');
+                    }, duration * 1000);
+                    
+                  } else {
+                    // Check if it's an emote from the available emotes
+                    const emoteFound = Object.entries(Chat.info.emotes).find(
+                      ([emoteName]) => emoteName.toLowerCase() === imageSource.toLowerCase()
+                    );
+                    
+                    if (emoteFound) {
+                      console.log(`Cyan Chat: Displaying emote "${emoteFound[0]}" for ${duration}s`);
+                      const img = appendMedia("image", emoteFound[1].image, forceOnTop);
+                      
+                      // Auto-remove after duration
+                      setTimeout(() => {
+                        removeCurrentMedia('image');
+                      }, duration * 1000);
+                      
+                    } else {
+                      console.log(`Cyan Chat: Emote "${imageSource}" not found`);
+                    }
+                  }
+                  return;
+                }
+              }
+              // #endregion Image Display
 
               // #endregion COMMANDS
 
