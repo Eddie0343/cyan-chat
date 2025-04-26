@@ -276,7 +276,8 @@ function commandsUpdate(event) {
         'tts': $disableTTS,
         'rickroll': $disableRickroll,
         'ytplay': $disableYTPlay,
-        'ytstop': $disableYTStop
+        'ytstop': $disableYTStop,
+        'img': $disableIMG
     };
     
     // Iterate through all command checkboxes
@@ -492,6 +493,8 @@ function resetForm(event) {
     $disableRickroll.prop("checked", false);
     $disableYTPlay.prop("checked", false);
     $disableYTStop.prop("checked", false);
+    $disableIMG.prop("checked", false);
+    $bigEmotes.prop("checked", false);
 
     sizeUpdate();
     fontUpdate();
@@ -842,6 +845,7 @@ const $disableTTS = $('input[name="disable_tts"]');
 const $disableRickroll = $('input[name="disable_rickroll"]');
 const $disableYTPlay = $('input[name="disable_ytplay"]');
 const $disableYTStop = $('input[name="disable_ytstop"]');
+const $disableIMG = $('input[name="disable_img"]');
 
 $fade_bool.change(fadeOption);
 $size.change(sizeUpdate);
@@ -868,3 +872,4 @@ $disableTTS.change(commandsUpdate);
 $disableRickroll.change(commandsUpdate);
 $disableYTPlay.change(commandsUpdate);
 $disableYTStop.change(commandsUpdate);
+$disableIMG.change(commandsUpdate);

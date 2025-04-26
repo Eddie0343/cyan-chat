@@ -1904,6 +1904,7 @@ Chat = {
                 message.params[1].toLowerCase().startsWith("!chat img") &&
                 typeof message.tags.badges === "string"
               ) {
+                if (Chat.info.disabledCommands.includes("img")) return;
                 var flag = false;
                 message.tags.badges.split(",").forEach((badge) => {
                   badge = badge.split("/");
