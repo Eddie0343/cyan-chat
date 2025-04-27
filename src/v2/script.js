@@ -363,7 +363,7 @@ Chat = {
         appendCSS("stroke", stroke);
       }
       if (Chat.info.weight) {
-        console.log("Weight is "+Chat.info.weight)
+        // console.log("Weight is "+Chat.info.weight)
         if (Chat.info.weight > 5 && Chat.info.weight < 100) {
           Chat.info.weight = 5;
           let weight = weights[Chat.info.weight - 1];
@@ -1041,7 +1041,7 @@ Chat = {
       // check the info for seventv paints and add them to the username
       if (service != "youtube") {
         if (Chat.info.seventvPaints[nick] && Chat.info.seventvPaints[nick].length > 0) {
-          console.log("Found 7tv paints for " + nick);
+          // console.log("Found 7tv paints for " + nick);
           $usernameCopy = $username.clone();
           $usernameCopy.css("position", "absolute");
           $usernameCopy.css("color", "transparent");
@@ -1060,10 +1060,11 @@ Chat = {
               "url(" + paint.backgroundImage + ")"
             );
             $username.css("background-color", color);
+            $username.css("background-position", "center");
           }
           let userShadow = "";
           if (Chat.info.stroke) {
-            console.log("Stroke is " + Chat.info.stroke)
+            // console.log("Stroke is " + Chat.info.stroke)
             if (Chat.info.stroke === 1) {
               userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
             } else if (Chat.info.stroke === 2) {
@@ -1075,14 +1076,14 @@ Chat = {
           if (paint.filter) {
             // Fix the regex to properly capture entire drop-shadow expressions including closing parenthesis
             const dropShadows = paint.filter.match(/drop-shadow\([^)]*\)/g) || [];
-            console.log("Drop shadows: ", dropShadows);
+            // console.log("Drop shadows: ", dropShadows);
             const smallBlurShadows = [];
             const largeBlurShadows = [];
 
             // Check if shadows already form a stroke effect
             const hasStrokeEffect = detectStrokeEffect(dropShadows);
             if (hasStrokeEffect) {
-              console.log("Detected existing stroke effect in paint shadows, disabling additional stroke");
+              // console.log("Detected existing stroke effect in paint shadows, disabling additional stroke");
               userShadow = "";
             }
             
@@ -1091,7 +1092,7 @@ Chat = {
               // Extract the blur radius (third value in px)
               const blurMatch = shadow.match(/-?\d+(\.\d+)?px\s+-?\d+(\.\d+)?px\s+(\d+(\.\d+)?)px/);
               if (blurMatch && parseFloat(blurMatch[3]) >= 1) {
-                console.log("Shadow is large because of blur radius: ", blurMatch[3]);
+                // console.log("Shadow is large because of blur radius: ", blurMatch[3]);
                 if (!shadow.endsWith("px)")) {
                   shadow = shadow + ")";
                 }
@@ -1099,13 +1100,13 @@ Chat = {
               } else {
                 try {
                   if (!parseFloat(blurMatch[3])) {
-                    console.log("Couldn't parse blur radius: ", blurMatch[3]);
+                    // console.log("Couldn't parse blur radius: ", blurMatch[3]);
                   }
                 } catch (e) {
                   console.log("Error parsing blur radius for blurMatch: ", blurMatch, "Error: ", e);
                 }
                 try {
-                  console.log("Shadow is small because of blur radius: ", blurMatch[3]);
+                  // console.log("Shadow is small because of blur radius: ", blurMatch[3]);
                 } catch (e) {
                   console.log("Error parsing blur radius: ", e);
                 }
@@ -1116,8 +1117,8 @@ Chat = {
               }
             });
 
-            console.log("Small blur shadows: ", smallBlurShadows);
-            console.log("Large blur shadows: ", largeBlurShadows);
+            // console.log("Small blur shadows: ", smallBlurShadows);
+            // console.log("Large blur shadows: ", largeBlurShadows);
             
             // Reconstruct filter with the correct order
             // Small blur shadows + mentionShadow + large blur shadows
@@ -1138,7 +1139,7 @@ Chat = {
           } else {
             finalFilter = userShadow;
           }
-          console.log("Applied filter:", finalFilter);
+          // console.log("Applied filter:", finalFilter);
           $username.css("filter", finalFilter);
           $username.addClass("paint");
           if (Chat.info.hidePaints) {
@@ -1215,33 +1216,33 @@ Chat = {
       if (typeof info.emotes === "string") {
         try {
           // Debug log for emote string format
-          console.log("[Emote Debug] Processing emotes string:", info.emotes);
+          // console.log("[Emote Debug] Processing emotes string:", info.emotes);
           
           info.emotes.split("/").forEach((emoteData) => {
             try {
               // Debug log for each emote data piece
-              console.log("[Emote Debug] Processing emote data:", emoteData);
+              // console.log("[Emote Debug] Processing emote data:", emoteData);
               
               // Defensive coding to prevent t[1] undefined error
               var twitchEmote = emoteData.split(":");
-              console.log("[Emote Debug] Split emote data:", twitchEmote);
+              // console.log("[Emote Debug] Split emote data:", twitchEmote);
               
               // Check if we have both parts of the emote data
               if (twitchEmote.length < 2) {
-                console.error("[Emote Debug] Invalid emote data format, missing colon separator:", emoteData);
+                // console.error("[Emote Debug] Invalid emote data format, missing colon separator:", emoteData);
                 return; // Skip this emote
               }
               
               // More defensive coding for the indices
               var indexesData = twitchEmote[1].split(",")[0];
               if (!indexesData) {
-                console.error("[Emote Debug] Invalid emote indices format:", twitchEmote[1]);
+                // console.error("[Emote Debug] Invalid emote indices format:", twitchEmote[1]);
                 return; // Skip this emote
               }
               
               var indexes = indexesData.split("-");
               if (indexes.length !== 2) {
-                console.error("[Emote Debug] Invalid emote index range format:", indexesData);
+                // console.error("[Emote Debug] Invalid emote index range format:", indexesData);
                 return; // Skip this emote
               }
               
@@ -1253,12 +1254,12 @@ Chat = {
               const endIndex = parseInt(indexes[1]);
               
               if (isNaN(startIndex) || isNaN(endIndex) || startIndex < 0 || endIndex >= aux.length || startIndex > endIndex) {
-                console.error("[Emote Debug] Invalid index range:", startIndex, endIndex, "for message length:", aux.length);
+                // console.error("[Emote Debug] Invalid index range:", startIndex, endIndex, "for message length:", aux.length);
                 return; // Skip this emote
               }
               
               var emoteCode = aux.substr(startIndex, endIndex - startIndex + 1);
-              console.log("[Emote Debug] Successfully extracted emote code:", emoteCode);
+              // console.log("[Emote Debug] Successfully extracted emote code:", emoteCode);
               
               replacements[emoteCode] =
                 '<img class="emote" src="https://static-cdn.jtvnw.net/emoticons/v2/' +
@@ -1272,7 +1273,7 @@ Chat = {
           console.error("[Emote Debug] Critical error in emote processing:", error, "Full emotes string:", info.emotes);
         }
       } else {
-        console.log("[Emote Debug] No emotes to process or emotes is not a string:", typeof info.emotes);
+        // console.log("[Emote Debug] No emotes to process or emotes is not a string:", typeof info.emotes);
       }
 
       message = escapeHtml(message);
@@ -1487,78 +1488,96 @@ Chat = {
             var $mention = $(`<span class="mention">${word}</span>`);
             // console.log(Chat.info.seventvPaints);
             if (Chat.info.seventvPaints[username] && Chat.info.seventvPaints[username].length > 0 && !Chat.info.hidePaints) {
-              console.log(`Found paint for ${username}: ${Chat.info.seventvPaints[username]}`);
+              // console.log(`Found paint for ${username}: ${Chat.info.seventvPaints[username]}`);
               // $mentionCopy = $mention.clone();
               // $mentionCopy.css("position", "absolute");
               // $mentionCopy.css("color", "transparent");
               // $mentionCopy.css("z-index", "-1");
+              paint = Chat.info.seventvPaints[username][0];
+              if (paint.type === "gradient") {
+                $mention.css("background-image", paint.backgroundImage);
+              } else if (paint.type === "image") {
+                $mention.css(
+                  "background-image",
+                  "url(" + paint.backgroundImage + ")"
+                );
+                $mention.css("background-color", color);
+                $mention.css("background-position", "center");
+              }
+              let mentionShadow = "";
+              if (Chat.info.stroke) {
+                if (Chat.info.stroke === 1) {
+                  mentionShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+                } else if (Chat.info.stroke === 2) {
+                  mentionShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+                }
+              }
+              // Process paint.filter to handle large blur drop-shadows correctly
+              let finalFilter = '';
+              if (paint.filter) {
+                // Fix the regex to properly capture entire drop-shadow expressions including closing parenthesis
+                const dropShadows = paint.filter.match(/drop-shadow\([^)]*\)/g) || [];
+                const smallBlurShadows = [];
+                const largeBlurShadows = [];
 
-              Chat.info.seventvPaints[username].forEach((paint) => {
-                if (paint.type === "gradient") {
-                  $mention.css("background-image", paint.backgroundImage);
-                } else if (paint.type === "image") {
-                  $mention.css(
-                    "background-image",
-                    "url(" + paint.backgroundImage + ")"
-                  );
-                }
-                let mentionShadow = "";
-                if (Chat.info.stroke) {
-                  if (Chat.info.stroke === 1) {
-                    mentionShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
-                  } else if (Chat.info.stroke === 2) {
-                    mentionShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
-                  }
-                }
-                // Process paint.filter to handle large blur drop-shadows correctly
-                if (paint.filter) {
-                  // Fix the regex to properly capture entire drop-shadow expressions including closing parenthesis
-                  const dropShadows = paint.filter.match(/drop-shadow\([^)]*\)/g) || [];
-                  const smallBlurShadows = [];
-                  const largeBlurShadows = [];
-                  
-                  // Categorize drop-shadows based on blur radius
-                  dropShadows.forEach(shadow => {
-                    // Extract the blur radius (third value in px)
-                    const blurMatch = shadow.match(/\d+(\.\d+)?px\s+\d+(\.\d+)?px\s+(\d+(\.\d+)?)px/);
-                    if (blurMatch && parseFloat(blurMatch[3]) >= 1) {
-                      if (!shadow.endsWith("px)")) {
-                        shadow = shadow + ")";
-                      }
-                      largeBlurShadows.push(shadow);
-                    } else {
-                      if (!shadow.endsWith("px)")) {
-                        shadow = shadow + ")";
-                      }
-                      smallBlurShadows.push(shadow);
-                    }
-                  });
-                  
-                  // Reconstruct filter with the correct order
-                  // Small blur shadows + mentionShadow + large blur shadows
-                  let finalFilter = '';
-                  
-                  if (smallBlurShadows.length > 0) {
-                    finalFilter += smallBlurShadows.join(' ');
-                  }
-                  
-                  if (mentionShadow) {
-                    finalFilter += mentionShadow;
-                  }
-                  
-                  if (largeBlurShadows.length > 0) {
-                    finalFilter += ' ' + largeBlurShadows.join(' ');
-                  }
-                  
-                  // Debug log to verify the filter string
-                  console.log("Applied filter:", finalFilter);
-                  $mention.css("filter", finalFilter);
-                } else {
-                  $mention.css("filter", mentionShadow);
+                // Check if shadows already form a stroke effect
+                const hasStrokeEffect = detectStrokeEffect(dropShadows);
+                if (hasStrokeEffect) {
+                  // console.log("Detected existing stroke effect in paint shadows, disabling additional stroke");
+                  mentionShadow = "";
                 }
                 
-                $mention.addClass("paint");
-              });
+                // Categorize drop-shadows based on blur radius
+                dropShadows.forEach(shadow => {
+                  // Extract the blur radius (third value in px)
+                  const blurMatch = shadow.match(/-?\d+(\.\d+)?px\s+-?\d+(\.\d+)?px\s+(\d+(\.\d+)?)px/);
+                  if (blurMatch && parseFloat(blurMatch[3]) >= 1) {
+                    if (!shadow.endsWith("px)")) {
+                      shadow = shadow + ")";
+                    }
+                    largeBlurShadows.push(shadow);
+                  } else {
+                    try {
+                      if (!parseFloat(blurMatch[3])) {
+                        // console.log("Couldn't parse blur radius: ", blurMatch[3]);
+                      }
+                    } catch (e) {
+                      console.log("Error parsing blur radius for blurMatch: ", blurMatch, "Error: ", e);
+                    }
+                    try {
+                      // console.log("Shadow is small because of blur radius: ", blurMatch[3]);
+                    } catch (e) {
+                      console.log("Error parsing blur radius: ", e);
+                    }
+                    if (!shadow.endsWith("px)")) {
+                      shadow = shadow + ")";
+                    }
+                    smallBlurShadows.push(shadow);
+                  }
+                });
+                
+                // Reconstruct filter with the correct order
+                // Small blur shadows + mentionShadow + large blur shadows
+                
+                if (smallBlurShadows.length > 0) {
+                  finalFilter += smallBlurShadows.join(' ');
+                }
+                
+                if (mentionShadow) {
+                  finalFilter += mentionShadow;
+                }
+                
+                if (largeBlurShadows.length > 0) {
+                  finalFilter += ' ' + largeBlurShadows.join(' ');
+                }
+                
+                // Debug log to verify the filter string
+                // console.log("Applied filter:", finalFilter);
+              } else {
+                finalFilter = mentionShadow;
+              }
+              $mention.css("filter", finalFilter);
+              $mention.addClass("paint");
               
               var mentionHtml = $mention[0].outerHTML;
               return mentionHtml;
@@ -1866,7 +1885,7 @@ Chat = {
 
                   if (Chat.info.voice) {
                     normalizedVoiceConfig = Chat.info.voice.charAt(0).toUpperCase() + Chat.info.voice.slice(1).toLowerCase();
-                    console.log(normalizedVoiceConfig);
+                    // console.log(normalizedVoiceConfig);
                     if (allowedVoices.includes(normalizedVoiceConfig)) {
                       voice = normalizedVoiceConfig;
                     }
@@ -2228,7 +2247,7 @@ function generateTestMessages(count) {
 
     // Get available emotes from Chat.info.emotes
     const availableEmotes = Object.keys(Chat.info.emotes);
-    console.log(`[Test Messages] Found ${availableEmotes.length} available emotes`);
+    // console.log(`[Test Messages] Found ${availableEmotes.length} available emotes`);
     
     // Generate UUID-like message IDs (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
     function generateMessageId() {
@@ -2240,13 +2259,13 @@ function generateTestMessages(count) {
     }
     
     // Create messages with exact Twitch IRC tag structure
-    console.log("[Test Messages] Creating messages with exact Twitch IRC structure");
+    // console.log("[Test Messages] Creating messages with exact Twitch IRC structure");
     
     // Process paint data early to avoid async issues
     $.getJSON("./styles/unique-paint-types.json")
       .done(function(paintData) {
         try {
-          console.log("[Test Messages] Paint data loaded successfully");
+          // console.log("[Test Messages] Paint data loaded successfully");
           
           if (!paintData || !paintData.data || !paintData.data.cosmetics || !paintData.data.cosmetics.paints) {
             console.error("[Test Messages] Error: Invalid paint data structure", paintData);
@@ -2255,7 +2274,7 @@ function generateTestMessages(count) {
           }
           
           const availablePaints = paintData.data.cosmetics.paints;
-          console.log(`[Test Messages] Found ${availablePaints.length} available paints`);
+          // console.log(`[Test Messages] Found ${availablePaints.length} available paints`);
           createAndSendMessages(availablePaints);
         } catch (error) {
           console.error("[Test Messages] Error processing paint data:", error);
@@ -2271,7 +2290,7 @@ function generateTestMessages(count) {
     function createAndSendMessages(availablePaints) {
       // Create messages
       for (let i = 0; i < count; i++) {
-        const username = usernames[Math.floor(Math.random() * usernames.length)] + `_${Math.floor(Math.random() * 1000000).toString()}`;
+        const username = usernames[Math.floor(Math.random() * usernames.length)] + `${Math.floor(Math.random() * 1000000).toString()}`;
         const userId = (Math.floor(Math.random() * 900000) + 100000).toString();
         const roomId = "123456789";
         
@@ -2300,17 +2319,113 @@ function generateTestMessages(count) {
           
           // Maybe add a mention
           if (Math.random() < 0.3) {
-            const mentionedUser = usernames[Math.floor(Math.random() * usernames.length)] + `_${Math.floor(Math.random() * 1000000).toString()}`;
+            const mentionedUser = usernames[Math.floor(Math.random() * usernames.length)] + `${Math.floor(Math.random() * 1000000).toString()}`;
+            // Initialize empty paint array for every user to prevent undefined errors
+            if (!Chat.info.seventvPaints[mentionedUser]) {
+              Chat.info.seventvPaints[mentionedUser] = [];
+            }
+
+            // 30% chance of using a Twitch color, else generate a random hex
+            let mentionColor;
+            if (Math.random() < 0.3) {
+              mentionColor = twitchColors[Math.floor(Math.random() * twitchColors.length)];
+            } else {
+              // Generate random hex color
+              mentionColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            }
+            if (Chat.info.readable) {
+              if (mentionColor === "#8A2BE2") {
+                mentionColor = "#C797F4";
+              }
+              if (mentionColor === "#008000") {
+                mentionColor = "#00FF00";
+              }
+              if (mentionColor === "#2420d9") {
+                mentionColor = "#BCBBFC";
+              }
+              var colorIsReadable = tinycolor.isReadable("#18181b", mentionColor, {});
+              var readableColor = tinycolor(mentionColor);
+              while (!colorIsReadable) {
+                readableColor = readableColor.lighten(5);
+                colorIsReadable = tinycolor.isReadable("#18181b", readableColor, {});
+              }
+              mentionColor = readableColor
+            }
+            Chat.info.colors[mentionedUser] = mentionColor;
+
+            // Apply paint to some mentioned users
+            const mentionUsePaint = Math.random() < PAINT_CHANCE && availablePaints.length > 0;
+            let mentionHasPaint = false;
+            
+            if (mentionUsePaint) {
+              try {
+                // console.log(`[Test Messages] Applying paint to user: ${mentionedUser}`);
+                mentionHasPaint = true;
+                
+                const mentionRandomPaintIndex = Math.floor(Math.random() * availablePaints.length);
+                const mentionRandomPaint = availablePaints[mentionRandomPaintIndex];
+                
+                // Create paint based on type
+                if (mentionRandomPaint.function === "URL") {
+                  // Image paint
+                  let mentionShadows = "";
+                  if (mentionRandomPaint.shadows && Array.isArray(mentionRandomPaint.shadows)) {
+                    try {
+                      mentionShadows = createDropShadows(mentionRandomPaint.shadows);
+                    } catch (error) {
+                      console.error(`[Test Messages] Error creating shadows: ${error.message}`);
+                    }
+                  }
+                  
+                  Chat.info.seventvPaints[mentionedUser] = [{
+                    type: "image",
+                    name: mentionRandomPaint.name,
+                    backgroundImage: mentionRandomPaint.image_url,
+                    filter: mentionShadows
+                  }];
+                } else {
+                  // Gradient paint
+                  try {
+                    if (Array.isArray(mentionRandomPaint.stops) && mentionRandomPaint.stops.length > 0) {
+                      const mentionGradient = createGradient(
+                        mentionRandomPaint.angle || 0,
+                        mentionRandomPaint.stops,
+                        mentionRandomPaint.function || "LINEAR_GRADIENT",
+                        mentionRandomPaint.shape || "circle",
+                        mentionRandomPaint.repeat || false
+                      );
+                      
+                      let mentionShadows = "";
+                      if (mentionRandomPaint.shadows && Array.isArray(mentionRandomPaint.shadows)) {
+                        mentionShadows = createDropShadows(mentionRandomPaint.shadows);
+                      }
+                      
+                      Chat.info.seventvPaints[mentionedUser] = [{
+                        type: "gradient",
+                        name: mentionRandomPaint.name,
+                        backgroundImage: mentionGradient,
+                        filter: mentionShadows
+                      }];
+                    }
+                  } catch (error) {
+                    console.error(`[Test Messages] Error creating gradient: ${error.message}`);
+                  }
+                }
+              } catch (error) {
+                console.error(`[Test Messages] Error applying paint: ${error.message}`);
+              }
+            }
+
             textMessage = textMessage + " @" + mentionedUser;
           }
           
-          console.log(`[Test Messages] Created text message: "${textMessage.substring(0, 30)}${textMessage.length > 30 ? '...' : ''}"`)
+          // console.log(`[Test Messages] Created text message: "${textMessage.substring(0, 30)}${textMessage.length > 30 ? '...' : ''}"`)
         }
         
         // Create a Twitch IRC tag object with ALL required fields
         const isMod = Math.random() < 0.2;
         const isBroadcaster = Math.random() < 0.1;
-        const color = Math.random() < 0.7 ? twitchColors[Math.floor(Math.random() * twitchColors.length)] : null;
+        const color = Math.random() < 0.3 ? twitchColors[Math.floor(Math.random() * twitchColors.length)] : '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
         
         // Create badges string
         let badgesString = "";
@@ -2351,7 +2466,7 @@ function generateTestMessages(count) {
         
         if (usePaint) {
           try {
-            console.log(`[Test Messages] Applying paint to user: ${username}`);
+            // console.log(`[Test Messages] Applying paint to user: ${username}`);
             hasPaint = true;
             
             const randomPaintIndex = Math.floor(Math.random() * availablePaints.length);
@@ -2424,7 +2539,7 @@ function generateTestMessages(count) {
         cumulativeDelay += item.delay;
         setTimeout(() => {
           try {
-            console.log(`[Test Messages] Sending message ${index+1}/${messageQueue.length} (user: ${item.username}, has paint: ${item.hasPaint})`);
+            // console.log(`[Test Messages] Sending message ${index+1}/${messageQueue.length} (user: ${item.username}, has paint: ${item.hasPaint})`);
             Chat.write(item.username, item.tags, item.message, "twitch");
           } catch (error) {
             console.error(`[Test Messages] Error sending message: ${error.message}`);
@@ -2491,13 +2606,13 @@ function detectStrokeEffect(dropShadows) {
   // Check if we have at least 3 directions (enough to form a partial stroke)
   hasMultipleDirections = shadowDirections.size >= 3;
   
-  console.log("Shadow analysis:", {
-    directions: Array.from(shadowDirections),
-    hasMultipleDirections,
-    hasOppositeDirections,
-    hasBlackColor,
-    hasLargeBlur
-  });
+  // console.log("Shadow analysis:", {
+  //   directions: Array.from(shadowDirections),
+  //   hasMultipleDirections,
+  //   hasOppositeDirections,
+  //   hasBlackColor,
+  //   hasLargeBlur
+  // });
   
   // Consider it a stroke effect if:
   // 1. It has multiple directions (at least 3)
