@@ -13,6 +13,10 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
     clean: true, // Ensure the output directory is cleaned on each build
   },
+  // Add source map support for better error tracking
+  devtool: 'source-map',
+  // Add mode configuration
+  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   module: {
     rules: [
       {
@@ -27,6 +31,11 @@ module.exports = {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
         type: "asset/resource",
       },
+      {
+        test: /\.js$/,
+        use: ["source-map-loader"],
+        enforce: "pre"
+      }
     ],
   },
   plugins: [

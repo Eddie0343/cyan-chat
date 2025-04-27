@@ -1041,6 +1041,7 @@ Chat = {
       // check the info for seventv paints and add them to the username
       if (service != "youtube") {
         if (Chat.info.seventvPaints[nick] && Chat.info.seventvPaints[nick].length > 0) {
+          console.log("Found 7tv paints for " + nick);
           $usernameCopy = $username.clone();
           $usernameCopy.css("position", "absolute");
           $usernameCopy.css("color", "transparent");
@@ -1050,72 +1051,99 @@ Chat = {
             $usernameCopy.css("padding-right", "0.5em");
             $usernameCopy.css("text-overflow", "clip");
           }
-          Chat.info.seventvPaints[nick].forEach((paint) => {
-            if (paint.type === "gradient") {
-              $username.css("background-image", paint.backgroundImage);
-            } else if (paint.type === "image") {
-              $username.css(
-                "background-image",
-                "url(" + paint.backgroundImage + ")"
-              );
+          paint = Chat.info.seventvPaints[nick][0];
+          if (paint.type === "gradient") {
+            $username.css("background-image", paint.backgroundImage);
+          } else if (paint.type === "image") {
+            $username.css(
+              "background-image",
+              "url(" + paint.backgroundImage + ")"
+            );
+            $username.css("background-color", color);
+          }
+          let userShadow = "";
+          if (Chat.info.stroke) {
+            console.log("Stroke is " + Chat.info.stroke)
+            if (Chat.info.stroke === 1) {
+              userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+            } else if (Chat.info.stroke === 2) {
+              userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
             }
-            let userShadow = "";
-            if (Chat.info.stroke) {
-              if (Chat.info.stroke === 1) {
-                userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
-              } else if (Chat.info.stroke === 2) {
-                userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
-              }
+          }
+          // Process paint.filter to handle large blur drop-shadows correctly
+          let finalFilter = '';
+          if (paint.filter) {
+            // Fix the regex to properly capture entire drop-shadow expressions including closing parenthesis
+            const dropShadows = paint.filter.match(/drop-shadow\([^)]*\)/g) || [];
+            console.log("Drop shadows: ", dropShadows);
+            const smallBlurShadows = [];
+            const largeBlurShadows = [];
+
+            // Check if shadows already form a stroke effect
+            const hasStrokeEffect = detectStrokeEffect(dropShadows);
+            if (hasStrokeEffect) {
+              console.log("Detected existing stroke effect in paint shadows, disabling additional stroke");
+              userShadow = "";
             }
-            // Process paint.filter to handle large blur drop-shadows correctly
-            if (paint.filter) {
-              // Fix the regex to properly capture entire drop-shadow expressions including closing parenthesis
-              const dropShadows = paint.filter.match(/drop-shadow\([^)]*\)/g) || [];
-              const smallBlurShadows = [];
-              const largeBlurShadows = [];
-              
-              // Categorize drop-shadows based on blur radius
-              dropShadows.forEach(shadow => {
-                // Extract the blur radius (third value in px)
-                const blurMatch = shadow.match(/\d+(\.\d+)?px\s+\d+(\.\d+)?px\s+(\d+(\.\d+)?)px/);
-                if (blurMatch && parseFloat(blurMatch[3]) >= 1) {
-                  if (!shadow.endsWith("px)")) {
-                    shadow = shadow + ")";
-                  }
-                  largeBlurShadows.push(shadow);
-                } else {
-                  if (!shadow.endsWith("px)")) {
-                    shadow = shadow + ")";
-                  }
-                  smallBlurShadows.push(shadow);
+            
+            // Categorize drop-shadows based on blur radius
+            dropShadows.forEach(shadow => {
+              // Extract the blur radius (third value in px)
+              const blurMatch = shadow.match(/-?\d+(\.\d+)?px\s+-?\d+(\.\d+)?px\s+(\d+(\.\d+)?)px/);
+              if (blurMatch && parseFloat(blurMatch[3]) >= 1) {
+                console.log("Shadow is large because of blur radius: ", blurMatch[3]);
+                if (!shadow.endsWith("px)")) {
+                  shadow = shadow + ")";
                 }
-              });
-              
-              // Reconstruct filter with the correct order
-              // Small blur shadows + mentionShadow + large blur shadows
-              let finalFilter = '';
-              
-              if (smallBlurShadows.length > 0) {
-                finalFilter += smallBlurShadows.join(' ');
+                largeBlurShadows.push(shadow);
+              } else {
+                try {
+                  if (!parseFloat(blurMatch[3])) {
+                    console.log("Couldn't parse blur radius: ", blurMatch[3]);
+                  }
+                } catch (e) {
+                  console.log("Error parsing blur radius for blurMatch: ", blurMatch, "Error: ", e);
+                }
+                try {
+                  console.log("Shadow is small because of blur radius: ", blurMatch[3]);
+                } catch (e) {
+                  console.log("Error parsing blur radius: ", e);
+                }
+                if (!shadow.endsWith("px)")) {
+                  shadow = shadow + ")";
+                }
+                smallBlurShadows.push(shadow);
               }
-              
-              if (userShadow) {
-                finalFilter += userShadow;
-              }
-              
-              if (largeBlurShadows.length > 0) {
-                finalFilter += ' ' + largeBlurShadows.join(' ');
-              }
-              
-              // Debug log to verify the filter string
-              console.log("Applied filter:", finalFilter);
-              $username.css("filter", finalFilter);
+            });
+
+            console.log("Small blur shadows: ", smallBlurShadows);
+            console.log("Large blur shadows: ", largeBlurShadows);
+            
+            // Reconstruct filter with the correct order
+            // Small blur shadows + mentionShadow + large blur shadows
+            
+            if (smallBlurShadows.length > 0) {
+              finalFilter += smallBlurShadows.join(' ');
             }
-            $username.addClass("paint");
-            if (Chat.info.hidePaints) {
-              $username.addClass("nopaint");
+            
+            if (userShadow) {
+              finalFilter += userShadow;
             }
-          });
+            
+            if (largeBlurShadows.length > 0) {
+              finalFilter += ' ' + largeBlurShadows.join(' ');
+            }
+            
+            // Debug log to verify the filter string
+          } else {
+            finalFilter = userShadow;
+          }
+          console.log("Applied filter:", finalFilter);
+          $username.css("filter", finalFilter);
+          $username.addClass("paint");
+          if (Chat.info.hidePaints) {
+            $username.addClass("nopaint");
+          }
           $userInfo.append($usernameCopy);
         } else {
           let userShadow = "";
@@ -1185,17 +1213,66 @@ Chat = {
       // Replacing emotes and cheers
       var replacements = {};
       if (typeof info.emotes === "string") {
-        info.emotes.split("/").forEach((emoteData) => {
-          var twitchEmote = emoteData.split(":");
-          var indexes = twitchEmote[1].split(",")[0].split("-");
-          var emojis = new RegExp("[\u1000-\uFFFF]+", "g");
-          var aux = message.replace(emojis, " ");
-          var emoteCode = aux.substr(indexes[0], indexes[1] - indexes[0] + 1);
-          replacements[emoteCode] =
-            '<img class="emote" src="https://static-cdn.jtvnw.net/emoticons/v2/' +
-            twitchEmote[0] +
-            '/default/dark/3.0"/>';
-        });
+        try {
+          // Debug log for emote string format
+          console.log("[Emote Debug] Processing emotes string:", info.emotes);
+          
+          info.emotes.split("/").forEach((emoteData) => {
+            try {
+              // Debug log for each emote data piece
+              console.log("[Emote Debug] Processing emote data:", emoteData);
+              
+              // Defensive coding to prevent t[1] undefined error
+              var twitchEmote = emoteData.split(":");
+              console.log("[Emote Debug] Split emote data:", twitchEmote);
+              
+              // Check if we have both parts of the emote data
+              if (twitchEmote.length < 2) {
+                console.error("[Emote Debug] Invalid emote data format, missing colon separator:", emoteData);
+                return; // Skip this emote
+              }
+              
+              // More defensive coding for the indices
+              var indexesData = twitchEmote[1].split(",")[0];
+              if (!indexesData) {
+                console.error("[Emote Debug] Invalid emote indices format:", twitchEmote[1]);
+                return; // Skip this emote
+              }
+              
+              var indexes = indexesData.split("-");
+              if (indexes.length !== 2) {
+                console.error("[Emote Debug] Invalid emote index range format:", indexesData);
+                return; // Skip this emote
+              }
+              
+              var emojis = new RegExp("[\u1000-\uFFFF]+", "g");
+              var aux = message.replace(emojis, " ");
+              
+              // Check if indices are within range
+              const startIndex = parseInt(indexes[0]);
+              const endIndex = parseInt(indexes[1]);
+              
+              if (isNaN(startIndex) || isNaN(endIndex) || startIndex < 0 || endIndex >= aux.length || startIndex > endIndex) {
+                console.error("[Emote Debug] Invalid index range:", startIndex, endIndex, "for message length:", aux.length);
+                return; // Skip this emote
+              }
+              
+              var emoteCode = aux.substr(startIndex, endIndex - startIndex + 1);
+              console.log("[Emote Debug] Successfully extracted emote code:", emoteCode);
+              
+              replacements[emoteCode] =
+                '<img class="emote" src="https://static-cdn.jtvnw.net/emoticons/v2/' +
+                twitchEmote[0] +
+                '/default/dark/3.0"/>';
+            } catch (innerError) {
+              console.error("[Emote Debug] Error processing individual emote:", innerError, "Data:", emoteData);
+            }
+          });
+        } catch (error) {
+          console.error("[Emote Debug] Critical error in emote processing:", error, "Full emotes string:", info.emotes);
+        }
+      } else {
+        console.log("[Emote Debug] No emotes to process or emotes is not a string:", typeof info.emotes);
       }
 
       message = escapeHtml(message);
@@ -1974,6 +2051,44 @@ Chat = {
               }
               // #endregion Image Display
 
+              // #region Test Messages
+              if (
+                message.params[1].toLowerCase().startsWith("!chat test") &&
+                typeof message.tags.badges === "string"
+              ) {
+                if (Chat.info.disabledCommands.includes("test")) return;
+                var flag = false;
+                message.tags.badges.split(",").forEach((badge) => {
+                  badge = badge.split("/");
+                  if (badge[0] === "moderator" || badge[0] === "broadcaster") {
+                    flag = true;
+                    return;
+                  }
+                });
+                if (nick == "johnnycyan") flag = true;
+                if (flag) {
+                  // Parse the command to extract the number of messages to generate
+                  const fullCommand = message.params[1].slice("!chat test".length).trim();
+                  
+                  // Default to 5 messages if not specified
+                  let numMessages = 5;
+                  
+                  // Try to parse the number from the command
+                  const numArg = parseInt(fullCommand);
+                  if (!isNaN(numArg) && numArg > 0 && numArg <= 50) {
+                    numMessages = numArg;
+                  }
+                  
+                  console.log(`Cyan Chat: Generating ${numMessages} test messages...`);
+                  
+                  // Generate and display the test messages
+                  generateTestMessages(numMessages);
+                  
+                  return;
+                }
+              }
+              // #endregion Test Messages
+
               // #endregion COMMANDS
 
               if (Chat.info.hideCommands) {
@@ -2038,3 +2153,365 @@ $(document).ready(function () {
     $.QueryString.channel ? $.QueryString.channel.toLowerCase() : "johnnycyan"
   );
 });
+
+// After the document ready function, add our new generateTestMessages function
+
+// Function to generate random test messages with exact Twitch IRC structure
+function generateTestMessages(count) {
+  console.log("[Test Messages] Starting test message generation");
+  try {
+    // Sample usernames for test messages
+    // Load usernames from the file
+    const usernames = [];
+    
+    // Make a synchronous AJAX request to get the usernames file
+    $.ajax({
+      url: './styles/usernames.txt',
+      async: false,
+      dataType: 'text',
+      success: function(data) {
+        // Split the data by new lines and filter out empty lines
+        const lines = data.split('\n').filter(line => line.trim() !== '');
+        // Add each line to the usernames array
+        lines.forEach(line => {
+          const username = line.trim().replace(/[^a-zA-Z0-9_]/g, ''); // Sanitize username
+          if (username.length > 0) {
+            usernames.push(username);
+          }
+        });
+      },
+      error: function(xhr, status, error) {
+        console.error("[Test Messages] Error loading usernames:", error);
+      }
+    });
+
+    console.log(`[Test Messages] Loaded ${usernames.length} usernames`);
+    if (usernames.length === 0) {
+      console.error("[Test Messages] No usernames found, aborting message generation");
+      return;
+    }
+
+    // Sample messages to choose from
+    const messageTemplates = [
+      "Hello chat! How's everyone doing?",
+      "This stream is so entertaining!",
+      "I can't believe that just happened!",
+      "LOL that was hilarious",
+      "gg wp",
+      "Is this a new emote?",
+      "That's awesome!",
+      "I'm just lurking while working",
+      "First time here, love the stream",
+      "Any recommendations for other streams?",
+      "This chat widget is so cool",
+      "Wait what happened? I was away",
+      "Greetings from [country]!",
+      "Anyone else having a good day?",
+      "Let's go!",
+      "Nice play!",
+      "That was incredible",
+      "Wow, did not expect that"
+    ];
+
+    // Create a queue for messages to avoid sending them all at once
+    const messageQueue = [];
+    const twitchColors = [
+      "#FF0000", "#0000FF", "#008000", "#B22222", "#FF7F50", 
+      "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E", 
+      "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F"
+    ];
+
+    // Chance settings
+    const EMOTE_CHANCE = 0.7;  // 70% chance of adding an emote
+    const PAINT_CHANCE = 0.3;  // 30% chance of using 7TV paint
+    const EMOTE_ONLY_CHANCE = 0.2; // 20% chance of emote-only message
+
+    // Get available emotes from Chat.info.emotes
+    const availableEmotes = Object.keys(Chat.info.emotes);
+    console.log(`[Test Messages] Found ${availableEmotes.length} available emotes`);
+    
+    // Generate UUID-like message IDs (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+    function generateMessageId() {
+      const pattern = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
+      return pattern.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    
+    // Create messages with exact Twitch IRC tag structure
+    console.log("[Test Messages] Creating messages with exact Twitch IRC structure");
+    
+    // Process paint data early to avoid async issues
+    $.getJSON("./styles/unique-paint-types.json")
+      .done(function(paintData) {
+        try {
+          console.log("[Test Messages] Paint data loaded successfully");
+          
+          if (!paintData || !paintData.data || !paintData.data.cosmetics || !paintData.data.cosmetics.paints) {
+            console.error("[Test Messages] Error: Invalid paint data structure", paintData);
+            createAndSendMessages([]);
+            return;
+          }
+          
+          const availablePaints = paintData.data.cosmetics.paints;
+          console.log(`[Test Messages] Found ${availablePaints.length} available paints`);
+          createAndSendMessages(availablePaints);
+        } catch (error) {
+          console.error("[Test Messages] Error processing paint data:", error);
+          createAndSendMessages([]);
+        }
+      })
+      .fail(function(error) {
+        console.error("[Test Messages] Failed to load paint data:", error);
+        createAndSendMessages([]);
+      });
+    
+    // Create and send test messages
+    function createAndSendMessages(availablePaints) {
+      // Create messages
+      for (let i = 0; i < count; i++) {
+        const username = usernames[Math.floor(Math.random() * usernames.length)] + `_${Math.floor(Math.random() * 1000000).toString()}`;
+        const userId = (Math.floor(Math.random() * 900000) + 100000).toString();
+        const roomId = "123456789";
+        
+        // Generate message content
+        let emoteOnly = Math.random() < EMOTE_ONLY_CHANCE;
+        let textMessage;
+        
+        if (emoteOnly) {
+          // Create an emote-only message with 1-2 random emotes
+          const emoteCount = Math.floor(Math.random() * 2) + 1;
+          const selectedEmotes = [];
+          
+          for (let j = 0; j < emoteCount; j++) {
+            if (availableEmotes.length > 0) {
+              const randomIndex = Math.floor(Math.random() * availableEmotes.length);
+              const randomEmote = availableEmotes[randomIndex];
+              selectedEmotes.push(randomEmote);
+            }
+          }
+          
+          textMessage = selectedEmotes.join(" ");
+          console.log(`[Test Messages] Created emote-only message: "${textMessage}"`);
+        } else {
+          // Start with a base message from templates
+          textMessage = messageTemplates[Math.floor(Math.random() * messageTemplates.length)];
+          
+          // Maybe add a mention
+          if (Math.random() < 0.3) {
+            const mentionedUser = usernames[Math.floor(Math.random() * usernames.length)] + `_${Math.floor(Math.random() * 1000000).toString()}`;
+            textMessage = textMessage + " @" + mentionedUser;
+          }
+          
+          console.log(`[Test Messages] Created text message: "${textMessage.substring(0, 30)}${textMessage.length > 30 ? '...' : ''}"`)
+        }
+        
+        // Create a Twitch IRC tag object with ALL required fields
+        const isMod = Math.random() < 0.2;
+        const isBroadcaster = Math.random() < 0.1;
+        const color = Math.random() < 0.7 ? twitchColors[Math.floor(Math.random() * twitchColors.length)] : null;
+        
+        // Create badges string
+        let badgesString = "";
+        if (isBroadcaster) {
+          badgesString = "broadcaster/1";
+        } else if (isMod) {
+          badgesString = "moderator/1";
+        }
+        
+        // Complete tags object that exactly matches real Twitch IRC messages
+        const tags = {
+          "badge-info": "",
+          "badges": badgesString,
+          "client-nonce": Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+          "color": color,
+          "display-name": username,
+          "emotes": "",
+          "first-msg": "0",
+          "flags": "",
+          "id": generateMessageId(),
+          "mod": isMod ? "1" : "0",
+          "room-id": roomId,
+          "subscriber": "0",
+          "tmi-sent-ts": Date.now().toString(),
+          "turbo": "0",
+          "user-id": userId,
+          "user-type": ""
+        };
+        
+        // Initialize empty paint array for every user to prevent undefined errors
+        if (!Chat.info.seventvPaints[username]) {
+          Chat.info.seventvPaints[username] = [];
+        }
+        
+        // Apply paint to some users
+        const usePaint = Math.random() < PAINT_CHANCE && availablePaints.length > 0;
+        let hasPaint = false;
+        
+        if (usePaint) {
+          try {
+            console.log(`[Test Messages] Applying paint to user: ${username}`);
+            hasPaint = true;
+            
+            const randomPaintIndex = Math.floor(Math.random() * availablePaints.length);
+            const randomPaint = availablePaints[randomPaintIndex];
+            
+            // Create paint based on type
+            if (randomPaint.function === "URL") {
+              // Image paint
+              let shadows = "";
+              if (randomPaint.shadows && Array.isArray(randomPaint.shadows)) {
+                try {
+                  shadows = createDropShadows(randomPaint.shadows);
+                } catch (error) {
+                  console.error(`[Test Messages] Error creating shadows: ${error.message}`);
+                }
+              }
+              
+              Chat.info.seventvPaints[username] = [{
+                type: "image",
+                name: randomPaint.name,
+                backgroundImage: randomPaint.image_url,
+                filter: shadows
+              }];
+            } else {
+              // Gradient paint
+              try {
+                if (Array.isArray(randomPaint.stops) && randomPaint.stops.length > 0) {
+                  const gradient = createGradient(
+                    randomPaint.angle || 0,
+                    randomPaint.stops,
+                    randomPaint.function || "LINEAR_GRADIENT",
+                    randomPaint.shape || "circle",
+                    randomPaint.repeat || false
+                  );
+                  
+                  let shadows = "";
+                  if (randomPaint.shadows && Array.isArray(randomPaint.shadows)) {
+                    shadows = createDropShadows(randomPaint.shadows);
+                  }
+                  
+                  Chat.info.seventvPaints[username] = [{
+                    type: "gradient",
+                    name: randomPaint.name,
+                    backgroundImage: gradient,
+                    filter: shadows
+                  }];
+                }
+              } catch (error) {
+                console.error(`[Test Messages] Error creating gradient: ${error.message}`);
+              }
+            }
+          } catch (error) {
+            console.error(`[Test Messages] Error applying paint: ${error.message}`);
+          }
+        }
+        
+        // Add message to queue
+        messageQueue.push({
+          username,
+          tags,
+          message: textMessage,
+          delay: 200 + Math.floor(Math.random() * 300),
+          hasPaint: hasPaint
+        });
+      }
+      
+      // Send messages with delays
+      let cumulativeDelay = 0;
+      messageQueue.forEach((item, index) => {
+        cumulativeDelay += item.delay;
+        setTimeout(() => {
+          try {
+            console.log(`[Test Messages] Sending message ${index+1}/${messageQueue.length} (user: ${item.username}, has paint: ${item.hasPaint})`);
+            Chat.write(item.username, item.tags, item.message, "twitch");
+          } catch (error) {
+            console.error(`[Test Messages] Error sending message: ${error.message}`);
+            console.error(error.stack);
+          }
+        }, cumulativeDelay);
+      });
+      
+      // Notify user
+      SendInfoText(`Generated ${count} test messages`);
+    }
+  } catch (error) {
+    console.error("[Test Messages] Critical error:", error);
+    console.error(error.stack);
+    SendInfoText("Error generating test messages");
+  }
+}
+
+function detectStrokeEffect(dropShadows) {
+  // Bail early if there aren't enough shadows to form a stroke
+  if (!dropShadows || dropShadows.length < 3) {
+    return false;
+  }
+  
+  // Extract shadow directions and properties
+  const shadowDirections = new Set();
+  let hasMultipleDirections = false;
+  let hasOppositeDirections = false;
+  let hasBlackColor = false;
+  let hasLargeBlur = false;
+  
+  // Parse each drop shadow to analyze its properties
+  dropShadows.forEach(shadow => {
+    // Extract x, y, blur and color
+    const match = shadow.match(/drop-shadow\(\s*(-?\d+(\.\d+)?)px\s+(-?\d+(\.\d+)?)px\s+(\d+(\.\d+)?)px\s+(.+)\)/);
+    
+    if (match) {
+      const x = parseFloat(match[1]);
+      const y = parseFloat(match[3]);
+      const blur = parseFloat(match[5]);
+      const color = match[7];
+      
+      // Check for black or very dark color
+      if (color.includes('rgba(0, 0, 0,') || color.includes('rgb(0, 0, 0') || 
+          color.includes('#000') || color.includes('black')) {
+        hasBlackColor = true;
+      }
+      
+      // Add direction to set
+      const direction = getDirection(x, y);
+      shadowDirections.add(direction);
+      
+      // Check if there are large blur values, indicating more of a glow than a stroke
+      if (blur >= 2) {
+        hasLargeBlur = true;
+      }
+      
+      // Check for opposite directions
+      if (shadowDirections.has('right') && shadowDirections.has('left')) hasOppositeDirections = true;
+      if (shadowDirections.has('up') && shadowDirections.has('down')) hasOppositeDirections = true;
+    }
+  });
+  
+  // Check if we have at least 3 directions (enough to form a partial stroke)
+  hasMultipleDirections = shadowDirections.size >= 3;
+  
+  console.log("Shadow analysis:", {
+    directions: Array.from(shadowDirections),
+    hasMultipleDirections,
+    hasOppositeDirections,
+    hasBlackColor,
+    hasLargeBlur
+  });
+  
+  // Consider it a stroke effect if:
+  // 1. It has multiple directions (at least 3)
+  // 2. It has some opposite directions (complete surrounding)
+  // 3. Uses black/dark color
+  // 4. Has reasonable blur values for a stroke effect
+  return hasMultipleDirections && hasOppositeDirections && hasBlackColor;
+}
+
+// Helper function to categorize shadow direction
+function getDirection(x, y) {
+  if (x > 0 && Math.abs(x) > Math.abs(y)) return 'right';
+  if (x < 0 && Math.abs(x) > Math.abs(y)) return 'left';
+  if (y > 0 && Math.abs(y) >= Math.abs(x)) return 'down';
+  if (y < 0 && Math.abs(y) >= Math.abs(x)) return 'up';
+  return 'center'; // for (0,0) or very small values
+}
