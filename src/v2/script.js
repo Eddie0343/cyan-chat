@@ -962,6 +962,29 @@ Chat = {
         }
         // End Special Badges
 
+        if (info["source-room-id"] && info["source-room-id"] != info["room-id"]) {
+          // We are in shared chat, and the message didn't originate here, so we need to add the source badge
+          if (Chat.info.sharedBadge && Chat.info.sharedID && info["source-room-id"] == Chat.info.sharedID) {
+            // We already have the badge URL and it's the correct channel
+            var $sourceBadge = $("<img/>");
+            $sourceBadge.addClass("badge");
+            // Set the badge URL
+            $sourceBadge.attr("src", Chat.info.sharedBadge);
+              
+            // Append the badge to userInfo only after we have the URL
+            $userInfo.append($sourceBadge);
+          } else {
+            // We don't have the badge URL yet, so we need to fetch it for the first time
+            TwitchAPI(`/users?id=${info["source-room-id"]}`).done(
+              function (res) {
+                sourceBadgeUrl = res.data[0].profile_image_url;
+                Chat.info.sharedBadge = sourceBadgeUrl;
+                Chat.info.sharedID = info["source-room-id"];
+              }
+            );
+          }
+        }
+
         const priorityBadges = [
           "predictions",
           "admin",
