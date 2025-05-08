@@ -1180,6 +1180,17 @@ Chat = {
           }
           $username.css("filter", userShadow);
         }
+      } else {
+        let userShadow = "";
+          if (Chat.info.stroke) {
+            // console.log("Stroke is " + Chat.info.stroke)
+            if (Chat.info.stroke === 1) {
+              userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+            } else if (Chat.info.stroke === 2) {
+              userShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+            }
+          }
+          $username.css("filter", userShadow);
       }
 
       if (Chat.info.hideColon && !Chat.info.center) {
