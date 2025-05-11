@@ -232,7 +232,7 @@ function findVideoFile(source) {
   });
 }
 
-function appendMedia(mediaType, source, forceOnTop = false) {
+function appendMedia(mediaType, source, forceOnTop = false, opacity = 1) {
   if (mediaType === "video") {
     // Check if any video element is already playing (but allow audio to play alongside)
     const existingVideo = document.querySelector("video, #youtube-embed-holder, iframe#youtube-embed");
@@ -280,6 +280,7 @@ function appendMedia(mediaType, source, forceOnTop = false) {
     img.style.height = "100%";
     img.style.objectFit = "contain"; // Maintain aspect ratio while filling container
     img.style.zIndex = forceOnTop ? "100" : "-50"; // Different z-index for images
+    img.style.opacity = opacity; // Set opacity
     img.id = "chat-image";
     
     // Add a container to help with positioning relative to chat_container

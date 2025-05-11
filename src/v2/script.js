@@ -1854,7 +1854,7 @@ Chat = {
 
               // #region Video
               if (
-                message.params[1].toLowerCase().startsWith("!chat video") &&
+                message.params[1].toLowerCase().startsWith("!chat video") || message.params[1].toLowerCase().startsWith("!chatis video") &&
                 typeof message.tags.badges === "string"
               ) {
                 var flag = false;
@@ -1867,7 +1867,8 @@ Chat = {
                 });
                 if (nick == "johnnycyan") flag = true
                 if (flag) {
-                  var fullCommand = message.params[1].slice("!chat video".length).trim();
+                  const commandPrefix = message.params[1].toLowerCase().startsWith("!chat video") ? "!chat video" : "!chatis video";
+                  var fullCommand = message.params[1].slice(commandPrefix.length).trim();
                   findVideoFile(fullCommand).then(result => {
                     if (result) {
                       console.log(`Cyan Chat: Playing ` + result);
@@ -1883,7 +1884,7 @@ Chat = {
 
               // #region TTS
               if (
-                message.params[1].toLowerCase().startsWith("!chat tts") &&
+                message.params[1].toLowerCase().startsWith("!chat tts") || message.params[1].toLowerCase().startsWith("!chatis tts") &&
                 typeof message.tags.badges === "string"
               ) {
                 if (Chat.info.disabledCommands.includes("tts")) return;
@@ -1898,7 +1899,8 @@ Chat = {
                 if (nick == "johnnycyan") flag = true
 
                 if (flag) {
-                  var fullCommand = message.params[1].slice("!chat tts".length).trim();
+                  const commandPrefix = message.params[1].toLowerCase().startsWith("!chat tts") ? "!chat tts" : "!chatis tts";
+                  var fullCommand = message.params[1].slice(commandPrefix.length).trim();
 
                   const schema = {
                     v: String,
@@ -1944,7 +1946,7 @@ Chat = {
 
               // #region YouTube Embed
               if (
-                message.params[1].toLowerCase().startsWith("!chat ytplay") &&
+                message.params[1].toLowerCase().startsWith("!chat ytplay") || message.params[1].toLowerCase().startsWith("!chatis ytplay") &&
                 typeof message.tags.badges === "string"
               ) {
                 if (Chat.info.disabledCommands.includes("ytplay")) return;
@@ -1959,7 +1961,8 @@ Chat = {
                 if (nick == "johnnycyan") flag = true;
                 if (flag) {
                   // Parse command arguments
-                  const commandArgs = message.params[1].slice("!chat ytplay".length).trim();
+                  const commandPrefix = message.params[1].toLowerCase().startsWith("!chat ytplay") ? "!chat ytplay" : "!chatis ytplay";
+                  const commandArgs = message.params[1].slice(commandPrefix.length).trim();
                   
                   // Extract URL and parameters using regex
                   const urlMatch = commandArgs.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s]+/i);
@@ -2007,7 +2010,7 @@ Chat = {
 
               // #region YouTube Stop
               if (
-                message.params[1].toLowerCase().startsWith("!chat ytstop") &&
+                message.params[1].toLowerCase().startsWith("!chat ytstop") || message.params[1].toLowerCase().startsWith("!chatis ytstop") &&
                 typeof message.tags.badges === "string"
               ) {
                 if (Chat.info.disabledCommands.includes("ytstop")) return;
@@ -2031,7 +2034,7 @@ Chat = {
 
               // #region Image Display
               if (
-                message.params[1].toLowerCase().startsWith("!chat img") &&
+                message.params[1].toLowerCase().startsWith("!chat img") || message.params[1].toLowerCase().startsWith("!chatis img") &&
                 typeof message.tags.badges === "string"
               ) {
                 if (Chat.info.disabledCommands.includes("img")) return;
@@ -2046,12 +2049,20 @@ Chat = {
                 if (nick == "johnnycyan") flag = true
                 if (flag) {
                   // Parse the command to extract image URL or emote name
-                  const fullCommand = message.params[1].slice("!chat img".length).trim();
+                  // Check if the command starts with !chat img or !chatis img
+                  const commandPrefix = message.params[1].toLowerCase().startsWith("!chat img") ? "!chat img" : "!chatis img";
+                  // Extract the full command after the prefix
+                  const fullCommand = message.params[1].slice(commandPrefix.length).trim();
                   
                   // Define the schema for flag parsing
                   const schema = {
                     d: Number,   // Duration in seconds
                     f: Boolean,  // Force on top flag
+                    s: Number,   // Alternate flag for duration
+                    t: Number,   // Alternate flag for duration
+                    o: Number,   // Opacity
+                    w: Number,   // Width
+                    h: Number,   // Height
                     duration: Number,
                   };
                   
@@ -2065,15 +2076,19 @@ Chat = {
                   const isURL = /^https?:\/\//i.test(imageSource);
                   
                   // Get duration from flags (default 5 seconds)
-                  const duration = flags.d || flags.duration || 5;
+                  const duration = flags.d || flags.duration || flags.s || flags.t || 5;
                   
                   // Get force on top flag
                   const forceOnTop = flags.f || false;
+
+                  const opacity = flags.o || 1;
+                  if (opacity < 0) opacity = 0;
+                  if (opacity > 1) opacity = 1;
                   
                   if (isURL) {
                     // It's a URL, display directly
                     console.log(`Cyan Chat: Displaying image from URL for ${duration}s`);
-                    const img = appendMedia("image", imageSource, forceOnTop);
+                    const img = appendMedia("image", imageSource, forceOnTop, opacity);
                     
                     // Auto-remove after duration
                     setTimeout(() => {
@@ -2081,6 +2096,93 @@ Chat = {
                     }, duration * 1000);
                     
                   } else {
+                    // First check if the user has personal 7tv emotes
+                    if (Chat.info.seventvPersonalEmotes[message.tags["user-id"]]) {
+                      let personalEmote = null;
+                      Object.entries(Chat.info.seventvPersonalEmotes[message.tags["user-id"]]).forEach((emote) => {
+                        if (imageSource === emote[0]) {
+                          personalEmote = emote[1];
+                        }
+                      });
+                      if (personalEmote) {
+                        console.log(`Cyan Chat: Displaying personal emote "${personalEmote.name}" for ${duration}s`);
+                        const img = appendMedia("image", personalEmote.image, forceOnTop, opacity);
+                        
+                        // Auto-remove after duration
+                        setTimeout(() => {
+                          removeCurrentMedia('image');
+                        }, duration * 1000);
+                        
+                        return;
+                      }
+                    }
+
+                    // Check if it's a native Twitch emote
+                    let isTwitchEmote = false;
+                    let twitchEmoteId = null;
+                    
+                    if (typeof message.tags.emotes === "string" && message.tags.emotes !== "") {
+                      try {
+                        // Split the emotes string by /
+                        const emoteParts = message.tags.emotes.split("/");
+                        
+                        // Loop through each emote data
+                        for (const emoteData of emoteParts) {
+                          // Split by colon to get ID and positions
+                          const twitchEmote = emoteData.split(":");
+                          
+                          // Skip if invalid format
+                          if (twitchEmote.length < 2) continue;
+                          
+                          // Get the first position
+                          const indexesData = twitchEmote[1].split(",")[0];
+                          if (!indexesData) continue;
+                          
+                          // Get start and end indexes
+                          const indexes = indexesData.split("-");
+                          if (indexes.length !== 2) continue;
+                          
+                          const startIndex = parseInt(indexes[0]);
+                          const endIndex = parseInt(indexes[1]);
+                          
+                          // Get the emote name from the message
+                          var emojis = new RegExp("[\u1000-\uFFFF]+", "g");
+                          var aux = message.params[1].replace(emojis, " ");
+                          
+                          // Check if indices are valid
+                          if (isNaN(startIndex) || isNaN(endIndex) || 
+                            startIndex < 0 || endIndex >= aux.length || 
+                            startIndex > endIndex) continue;
+                          
+                          // Extract the emote code
+                          var emoteCode = aux.substr(startIndex, endIndex - startIndex + 1);
+                          
+                          // Check if it matches the requested emote
+                          if (emoteCode.toLowerCase() === imageSource.toLowerCase()) {
+                            isTwitchEmote = true;
+                            twitchEmoteId = twitchEmote[0];
+                            break;
+                          }
+                        }
+                        
+                        // If found, display the Twitch emote
+                        if (isTwitchEmote && twitchEmoteId) {
+                          console.log(`Cyan Chat: Displaying Twitch emote "${imageSource}" for ${duration}s`);
+                          const emoteUrl = `https://static-cdn.jtvnw.net/emoticons/v2/${twitchEmoteId}/default/dark/3.0`;
+                          const img = appendMedia("image", emoteUrl, forceOnTop, opacity);
+                          
+                          // Auto-remove after duration
+                          setTimeout(() => {
+                            removeCurrentMedia('image');
+                          }, duration * 1000);
+                          
+                          return;
+                        }
+                      } catch (error) {
+                        console.error("Error parsing Twitch emotes:", error);
+                      }
+                    }
+
                     // Check if it's an emote from the available emotes
                     const emoteFound = Object.entries(Chat.info.emotes).find(
                       ([emoteName]) => emoteName.toLowerCase() === imageSource.toLowerCase()
@@ -2088,7 +2190,7 @@ Chat = {
                     
                     if (emoteFound) {
                       console.log(`Cyan Chat: Displaying emote "${emoteFound[0]}" for ${duration}s`);
-                      const img = appendMedia("image", emoteFound[1].image, forceOnTop);
+                      const img = appendMedia("image", emoteFound[1].image, forceOnTop, opacity);
                       
                       // Auto-remove after duration
                       setTimeout(() => {
