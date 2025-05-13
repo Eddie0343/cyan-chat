@@ -147,6 +147,7 @@ Chat = {
       "off_commands" in $.QueryString
         ? $.QueryString.off_commands.toLowerCase().split(",")
         : [],
+    scale: "scale" in $.QueryString ? parseFloat($.QueryString.scale) : 1,
   },
 
   loadEmotes: function (channelID) {
@@ -320,6 +321,14 @@ Chat = {
         loadCustomFont(Chat.info.font);
       }
 
+      if (Chat.info.size == 1) {
+        Chat.info.seven_scale = 20/14;
+      } else if (Chat.info.size == 2) {
+        Chat.info.seven_scale = 34/14;
+      } else if (Chat.info.size == 3) {
+        Chat.info.seven_scale = 48/14;
+      }
+
       let emoteScale = 1;
       if (Chat.info.emoteScale > 1) {
         emoteScale = Chat.info.emoteScale;
@@ -385,6 +394,12 @@ Chat = {
       }
       if (Chat.info.invert) {
         appendCSS("variant", "invert");
+      }
+      if (Chat.info.scale) {
+        // Set CSS variable for scaling
+        document.documentElement.style.setProperty('--scale', Chat.info.scale);
+        // Update viewport to accommodate scaling
+        document.documentElement.style.setProperty('--inv-scale', 1/Chat.info.scale);
       }
 
       // Load badges

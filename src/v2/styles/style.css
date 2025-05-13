@@ -49,8 +49,10 @@ body {
   pointer-events: none;
   align-items: center;
   display: flex;
-  width: 100%;
   z-index: 1;
+  transform: scale(var(--scale, 1));
+  transform-origin: bottom left;
+  width: calc(100% / var(--scale, 1));
 }
 
 #info_text {
@@ -63,7 +65,7 @@ body {
 }
 
 #chat_container {
-  width: calc(100% - 20px);
+  width: calc(calc(100% / var(--scale, 1)) - 20px);
   padding: 10px;
   position: absolute;
   bottom: 0;
@@ -72,6 +74,9 @@ body {
   color: white;
   font-weight: 800;
   word-break: break-word;
+  transform: scale(var(--scale, 1));
+  transform-origin: var(--transform-origin, bottom) left;
+  box-sizing: border-box;
 }
 
 .user_info {

@@ -370,12 +370,12 @@ function createDropShadows(shadows) {
   return shadows
     .map((shadow) => {
       const color = convertColor(shadow.color);
-      var mult = 1;
+      var mult = 20/14;
       if (Chat.info.size > 0) {
         if (Chat.info.size > 3) {
-          mult = 3;
+          mult = Chat.info.seven_scale;
         } else {
-          mult = Chat.info.size;
+          mult = Chat.info.seven_scale;
         }
       }
       return `drop-shadow(${shadow.x_offset * mult}px ${shadow.y_offset * mult}px ${shadow.radius * mult}px ${color})`;
