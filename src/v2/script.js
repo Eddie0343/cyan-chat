@@ -295,21 +295,35 @@ Chat = {
 
   load: function (callback) {
     GetTwitchUserID(Chat.info.channel).done(function (res) {
-      // console.log(res.data[0].id);
-      Chat.info.channelID = res.data[0].id;
-      Chat.loadEmotes(Chat.info.channelID);
-      seven_ws(Chat.info.channel);
+      let error = false;
+      if (res.error) {
+        console.log("Error getting user ID: " + res.error);
+        Chat.info.id = "1"
+        error = true;
+      }
+      if (res.data.length == 0) {
+        console.log("No user found");
+        Chat.info.id = "1"
+        error = true;
+      }
 
-      client_id = res.client_id;
+      if (!error) {
+        // console.log(res.data[0].id);
+        Chat.info.channelID = res.data[0].id;
+        Chat.loadEmotes(Chat.info.channelID);
+        seven_ws(Chat.info.channel);
 
-      // Load channel colors
-      TwitchAPI("/chat/color?user_id=" + Chat.info.channelID).done(
-        function (res) {
-          res = res.data[0];
-          Chat.info.colors[Chat.info.channel] = Chat.getUserColor(Chat.info.channel, res);
-        }
-      );
-      Chat.loadUserPaints(Chat.info.channel, Chat.info.channelID);
+        client_id = res.client_id;
+
+        // Load channel colors
+        TwitchAPI("/chat/color?user_id=" + Chat.info.channelID).done(
+          function (res) {
+            res = res.data[0];
+            Chat.info.colors[Chat.info.channel] = Chat.getUserColor(Chat.info.channel, res);
+          }
+        );
+        Chat.loadUserPaints(Chat.info.channel, Chat.info.channelID);
+      }
 
       // Load CSS
       let size = sizes[Chat.info.size - 1];

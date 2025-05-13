@@ -120,9 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial application of styles
     applyStyles("size", sizes[2]);
-    
-    // Initialize scale
-    scaleUpdate();
 });
 
 // Unified popup show function
@@ -467,6 +464,7 @@ function resetForm(event) {
     $blockedUsers.val("");
     $size.val("3");
     $emoteScale.val("1");
+    $scale.val("1");
     $font.val("0");
     $height.val("4");
     $voice.val("Brian");
@@ -806,46 +804,6 @@ function showUrl(event) {
     });
 }
 
-function scaleUpdate(event) {
-    const scale = parseFloat($scale.val());
-    if (scale > 1) {
-        scale = 1;
-    }
-    if (scale < 0.1) {
-        scale = 0.1;
-    }
-    
-    // Toggle scaled class
-    if (scale !== 1) {
-        $("#example").addClass("scaled");
-    } else {
-        $("#example").removeClass("scaled");
-    }
-    
-    // Apply scale to the preview
-    $("#example").css({
-        "transform": `scale(${scale})`,
-        "transform-origin": "center center",
-        "width": `calc(100% / ${scale})`,
-        "height": `auto`, // Let height adjust automatically
-        "max-height": `calc(400px / ${scale})`, // Set max height based on scale
-        "margin-top": `${25 * scale - 25}%`, // Add extra margin if scaled up
-        "margin-bottom": `${25 * scale - 25}%` // Add extra margin if scaled up
-    });
-    
-    // Adjust container styles based on scale
-    $("#submit_container").css({
-        "min-height": `${scale > 1 ? 200 * scale : 200}px`
-    });
-    
-    // If scale is less than 1, add padding to make it more visible
-    if (scale < 1) {
-        $("#example").css("padding", "10px");
-    } else {
-        $("#example").css("padding", "1rem");
-    }
-}
-
 const $generator = $("form[name='generator']");
 const $channel = $('input[name="channel"]');
 const $ytChannel = $('input[name="yt-channel"]');
@@ -895,7 +853,6 @@ const $disableIMG = $('input[name="disable_img"]');
 $fade_bool.change(fadeOption);
 $size.change(sizeUpdate);
 $emoteScale.change(sizeUpdate);
-$scale.change(scaleUpdate);
 $font.change(fontUpdate);
 $height.change(heightUpdate);
 $custom_font.change(customFontUpdate);
