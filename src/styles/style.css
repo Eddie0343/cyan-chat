@@ -236,10 +236,14 @@ input:focus {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
+  overflow: visible;
+  padding-bottom: 15px;
 }
 
 .preview {
   display: flex;
+  margin-bottom: 10px;
 }
 
 .preview img {
@@ -255,7 +259,6 @@ input:focus {
   margin-top: 10px;
   padding: 1rem;
   border-radius: 15px;
-  overflow: hidden;
   color: white;
   font-weight: 800;
   word-break: break-word;
@@ -290,6 +293,10 @@ input:focus {
 
 #example .chat_line {
   line-height: 1.5em;
+}
+
+#example.scaled {
+  position: relative;
 }
 
 input[type="submit"],
