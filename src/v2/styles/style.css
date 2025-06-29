@@ -162,3 +162,96 @@ body {
   max-height: 2.2em;
   max-width: 6.6em;
 }
+
+/* Pronoun styling for default theme */
+.pronoun {
+  display: inline-block;
+  font-size: 0.7em;
+  font-weight: 600;
+  margin-left: 0.4em;
+  padding: 0.2em 0.5em;
+  border-radius: 0.8em;
+  color: black !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  vertical-align: middle;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Default gradient */
+}
+
+.pronoun:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Pronoun type gradients */
+.pronoun.hehim {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.pronoun.sheher {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+}
+
+.pronoun.theythem {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+.pronoun.shethem {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fee140 100%);
+}
+
+.pronoun.hethem {
+  background: linear-gradient(135deg, #4facfe 0%, #fed6e3 100%);
+}
+
+.pronoun.heshe {
+  background: linear-gradient(135deg, #4facfe 0%, #ff9a9e 100%);
+}
+
+.pronoun.xexem {
+  background: linear-gradient(135deg, #a8caba 0%, #8a74ae 100%);
+}
+
+.pronoun.faefaer {
+  background: linear-gradient(135deg, #667eea 0%, #9f5edf 100%);
+}
+
+.pronoun.vever {
+  background: linear-gradient(135deg, #ffeef1 0%, #f093fb 100%);
+}
+
+.pronoun.aeaer {
+  background: linear-gradient(135deg, #7cc2ff 0%, #00f2fe 100%);
+}
+
+.pronoun.ziehir {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.pronoun.perper {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.pronoun.eem {
+  background: linear-gradient(135deg, #667eea 0%, #9d64d6 100%);
+}
+
+.pronoun.itits {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* Additional common pronouns */
+.pronoun.any {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.pronoun.other {
+  background: linear-gradient(135deg, #a8caba 0%, #937cb8 100%);
+}
+
+.pronoun.ask {
+  background: linear-gradient(135deg, #7883b2 0%, #9475b2 100%);
+}

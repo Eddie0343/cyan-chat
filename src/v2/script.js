@@ -148,6 +148,12 @@ Chat = {
         ? $.QueryString.off_commands.toLowerCase().split(",")
         : [],
     scale: "scale" in $.QueryString ? parseFloat($.QueryString.scale) : 1,
+    showPronouns:
+      "pronouns" in $.QueryString
+        ? $.QueryString.pronouns.toLowerCase() === "true"
+        : false,
+    pronouns: {},
+    pronounTypes: {},
   },
 
   loadEmotes: function (channelID) {
@@ -293,6 +299,71 @@ Chat = {
     }
   },
 
+  loadPronounTypes: function() {
+    if (Object.keys(Chat.info.pronounTypes).length === 0) {
+      $.getJSON(addRandomQueryString("styles/pronoun_types.json")).done(function(res) {
+        res.forEach((pronoun) => {
+          Chat.info.pronounTypes[pronoun.name] = pronoun.display;
+        });
+      }).fail(function() {
+        console.warn("Failed to load pronoun types");
+      });
+    }
+  },
+
+  getUserPronoun: function(username) {
+    if (!Chat.info.showPronouns) {
+      return;
+    }
+
+    // Return cached pronoun if we have it
+    if (Chat.info.pronouns[username]) {
+      return Chat.info.pronouns[username];
+    }
+
+    // Fetch pronoun from API
+    $.getJSON(`https://pronouns.alejo.io/api/users/${encodeURIComponent(username)}`)
+      .done(function(res) {
+        if (res && res.length > 0 && res[0].pronoun_id) {
+          const pronounId = res[0].pronoun_id;
+          const displayPronoun = Chat.info.pronounTypes[pronounId];
+          if (displayPronoun) {
+            Chat.info.pronouns[username] = displayPronoun;
+            // Update any existing chat lines for this user
+            Chat.updatePronounsForUser(username, displayPronoun);
+          }
+        } else {
+          // Cache empty result to avoid repeated API calls
+          Chat.info.pronouns[username] = null;
+        }
+      })
+      .fail(function() {
+        // Cache empty result to avoid repeated API calls on failure
+        Chat.info.pronouns[username] = null;
+      });
+  },
+
+  updatePronounsForUser: function(username, pronoun) {
+    // Update pronouns in existing chat messages for this user
+    const $pronounElements = $(`.chat_line[data-nick="${username}"] .pronoun`);
+    $pronounElements.each(function() {
+      const $element = $(this);
+      $element.text(pronoun);
+      
+      // Find the pronoun type and apply the corresponding CSS class
+      const pronounType = Object.keys(Chat.info.pronounTypes).find(key => 
+        Chat.info.pronounTypes[key] === pronoun
+      );
+      if (pronounType) {
+        // Remove any existing pronoun type classes
+        $element.removeClass(Object.keys(Chat.info.pronounTypes).join(' '));
+        $element.addClass(pronounType);
+      }
+      
+      $element.show();
+    });
+  },
+
   load: function (callback) {
     GetTwitchUserID(Chat.info.channel).done(function (res) {
       let error = false;
@@ -323,6 +394,11 @@ Chat = {
           }
         );
         Chat.loadUserPaints(Chat.info.channel, Chat.info.channelID);
+
+        // Load pronouns if enabled
+        if (Chat.info.showPronouns) {
+          Chat.loadPronounTypes();
+        }
       }
 
       // Load CSS
@@ -1227,6 +1303,31 @@ Chat = {
       }
 
       $userInfo.append($username);
+
+      // Add pronouns if enabled
+      if (Chat.info.showPronouns && service !== "youtube") {
+        var $pronoun = $("<span></span>");
+        $pronoun.addClass("pronoun");
+        
+        // Check if we have cached pronouns for this user
+        const cachedPronoun = Chat.info.pronouns[nick];
+        if (cachedPronoun) {
+          $pronoun.text(cachedPronoun);
+          // Find the pronoun type and apply the corresponding CSS class
+          const pronounType = Object.keys(Chat.info.pronounTypes).find(key => 
+            Chat.info.pronounTypes[key] === cachedPronoun
+          );
+          if (pronounType) {
+            $pronoun.addClass(pronounType);
+          }
+          // If no specific type found, the default gradient from CSS will be used
+          $userInfo.append($pronoun);
+        } else if (cachedPronoun !== null) {
+          // Only fetch if we haven't already tried (null means we tried and failed/empty)
+          $pronoun.text(""); // Empty initially
+          Chat.getUserPronoun(nick);
+        }
+      }
 
       // Updating the 7tv checker
       if (service != "youtube") {

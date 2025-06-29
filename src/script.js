@@ -739,6 +739,7 @@ function generateURL(event) {
         hide_commands: $commands.is(":checked"),
         hide_badges: $badges.is(":checked"),
         hide_paints: $paints.is(":checked"),
+        pronouns: $pronouns.is(":checked"),
         hide_colon: $colon.is(":checked"),
         animate: $animate.is(":checked"),
         fade: $fade_bool.is(":checked") ? $fade.val() : false,
@@ -821,6 +822,7 @@ const $sync = $('input[name="sync"]');
 const $pruning = $('input[name="pruning"]');
 const $badges = $("input[name='badges']");
 const $paints = $("input[name='paints']");
+const $pronouns = $("input[name='pronouns']");
 const $colon = $("input[name='colon']");
 const $size = $("select[name='size']");
 const $emoteScale = $("select[name='emote_scale']");
