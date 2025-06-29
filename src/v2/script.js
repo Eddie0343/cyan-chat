@@ -2554,11 +2554,45 @@ function generateTestMessages(count) {
     
     // Create and send test messages
     function createAndSendMessages(availablePaints) {
+      // Pronoun types for test users
+      const pronounTypes = [
+        { display: "He/Him", name: "hehim" },
+        { display: "She/Her", name: "sheher" },
+        { display: "They/Them", name: "theythem" },
+        { display: "She/They", name: "shethem" },
+        { display: "He/They", name: "hethem" },
+        { display: "He/She", name: "heshe" },
+        { display: "Xe/Xem", name: "xexem" },
+        { display: "Fae/Faer", name: "faefaer" },
+        { display: "Ve/Ver", name: "vever" },
+        { display: "Ae/Aer", name: "aeaer" },
+        { display: "Zie/Hir", name: "ziehir" },
+        { display: "Per/Per", name: "perper" },
+        { display: "E/Em", name: "eem" },
+        { display: "It/Its", name: "itits" }
+      ];
+      
       // Create messages
       for (let i = 0; i < count; i++) {
         const username = usernames[Math.floor(Math.random() * usernames.length)] + `${Math.floor(Math.random() * 1000000).toString()}`;
         const userId = (Math.floor(Math.random() * 900000) + 100000).toString();
         const roomId = "123456789";
+        
+        // Assign random pronouns to test users (only if pronouns are enabled)
+        if (Chat.info.showPronouns) {
+          // 80% chance of having pronouns (some users might not have them set)
+          if (Math.random() < 0.8) {
+            const randomPronoun = pronounTypes[Math.floor(Math.random() * pronounTypes.length)];
+            Chat.info.pronouns[username] = randomPronoun.display;
+            
+            // Also ensure the pronoun type mapping exists
+            if (!Chat.info.pronounTypes[randomPronoun.name]) {
+              Chat.info.pronounTypes[randomPronoun.name] = randomPronoun.display;
+            }
+            
+            // console.log(`[Test Messages] Assigned pronouns "${randomPronoun.display}" to user ${username}`);
+          }
+        }
         
         // Generate message content
         let emoteOnly = Math.random() < EMOTE_ONLY_CHANCE;
@@ -2589,6 +2623,17 @@ function generateTestMessages(count) {
             // Initialize empty paint array for every user to prevent undefined errors
             if (!Chat.info.seventvPaints[mentionedUser]) {
               Chat.info.seventvPaints[mentionedUser] = [];
+            }
+
+            // Assign random pronouns to mentioned users too (only if pronouns are enabled)
+            if (Chat.info.showPronouns && Math.random() < 0.8) {
+              const randomPronoun = pronounTypes[Math.floor(Math.random() * pronounTypes.length)];
+              Chat.info.pronouns[mentionedUser] = randomPronoun.display;
+              
+              // Also ensure the pronoun type mapping exists
+              if (!Chat.info.pronounTypes[randomPronoun.name]) {
+                Chat.info.pronounTypes[randomPronoun.name] = randomPronoun.display;
+              }
             }
 
             // 30% chance of using a Twitch color, else generate a random hex
