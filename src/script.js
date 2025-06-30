@@ -398,6 +398,11 @@ function smsUpdate(event) {
         
         // Apply SMS styling to preview
         applyPreviewSMSTheme();
+        
+        // Preserve pronouns if they were enabled
+        if ($pronouns.is(":checked")) {
+            addPronounsToPreview();
+        }
     } else {
         $center.prop("disabled", false);
         $paints.prop("disabled", false);
@@ -413,6 +418,11 @@ function smsUpdate(event) {
         
         // Remove SMS styling from preview
         removePreviewSMSTheme();
+        
+        // Preserve pronouns if they were enabled
+        if ($pronouns.is(":checked")) {
+            addPronounsToPreview();
+        }
     }
 }
 
@@ -436,6 +446,11 @@ function centerUpdate(event) {
             ".chat_line { display: flex; }\n" +
             ".message .emote { vertical-align: top; }"
         );
+        
+        // Preserve pronouns if they were enabled
+        if ($pronouns.is(":checked")) {
+            addPronounsToPreview();
+        }
     } else {
         // Enable SMS option
         $sms.prop("disabled", false);
@@ -443,6 +458,11 @@ function centerUpdate(event) {
         removeStyles("variant_center");
         $('span[class="colon"]').css("display", "inline");
         colonUpdate();
+        
+        // Preserve pronouns if they were enabled
+        if ($pronouns.is(":checked")) {
+            addPronounsToPreview();
+        }
     }
 }
 
@@ -487,6 +507,10 @@ function resetForm(event) {
     $readable.prop("checked", true);
     $sync.prop("checked", false);
     $pruning.prop("checked", false);
+    $pronouns.prop("checked", false);
+    $pronounColorMode.val("default");
+    $pronounColorMode.prop("disabled", true);
+    $('.pronoun-color-field').hide();
     $custom_font.prop("disabled", true);
     $sms.prop("checked", false);
     $messageImage.val("");
@@ -510,6 +534,8 @@ function resetForm(event) {
     centerUpdate();
     smsUpdate();
     commandsUpdate();
+    pronounsUpdate();
+    removePronounsFromPreview();
 
     $result.addClass("hidden");
     $generator.removeClass("hidden");
@@ -656,6 +682,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Initial application of styles
   applyStyles("size", sizes[2]);
+  
+  // Initialize pronoun settings
+  pronounsUpdate();
   
   // Add responsive layout handling
   adjustFormLayout();
@@ -891,19 +920,77 @@ $pronounColor2.change(updatePronounColors);
 $pronounColorMode.change(pronounColorModeUpdate);
 $pronounColor1.change(updatePronounColors);
 $pronounColor2.change(updatePronounColors);
+$pronouns.change(pronounsUpdate);
 
 // Pronoun color customization functions
+function pronounsUpdate(event) {
+    const isChecked = $pronouns.is(":checked");
+    
+    // Enable/disable pronoun color settings based on checkbox
+    $pronounColorMode.prop('disabled', !isChecked);
+    $('.pronoun-color-field').toggle(isChecked);
+    
+    if (isChecked) {
+        // Add pronouns to preview
+        addPronounsToPreview();
+        // Show pronoun color settings if not default
+        pronounColorModeUpdate();
+    } else {
+        // Remove pronouns from preview
+        removePronounsFromPreview();
+        // Hide pronoun color settings
+        $('.pronoun-color-field').hide();
+    }
+}
+
+function addPronounsToPreview() {
+    // Add pronoun to Johnnycyan entries in preview
+    $("#example .chat_line").each(function() {
+        const $chatLine = $(this);
+        const $userInfo = $chatLine.find('.user_info');
+        const $nick = $userInfo.find('.nick');
+        
+        // Check if this is a Johnnycyan message by looking for the nick text
+        const nickText = $nick.text().toLowerCase();
+        if (nickText.includes('johnnycyan')) {
+            // Only add if pronoun doesn't already exist
+            if (!$userInfo.find('.pronoun').length) {
+                const $pronoun = $('<span class="pronoun hehim">He/Him</span>');
+                // Insert pronoun before the colon
+                const $colon = $userInfo.find('.colon');
+                if ($colon.length) {
+                    $colon.before($pronoun);
+                } else {
+                    // If no colon found, append to userInfo
+                    $userInfo.append($pronoun);
+                }
+            }
+        }
+    });
+    
+    // Apply current pronoun colors if custom mode is selected
+    updatePronounColors();
+}
+
+function removePronounsFromPreview() {
+    // Remove all pronoun elements from preview
+    $("#example .pronoun").remove();
+}
+
 function pronounColorModeUpdate(event) {
     const mode = $pronounColorMode.val();
     
     // Hide all pronoun color fields first
     $('.pronoun-color-field').hide();
     
-    if (mode === 'single') {
-        $('#single-gradient-field').show();
-    } else if (mode === 'custom') {
-        $('#custom-colors-field').show();
-        generateCustomPronounColorInputs();
+    // Only show fields if pronouns are enabled
+    if ($pronouns.is(":checked")) {
+        if (mode === 'single') {
+            $('#single-gradient-field').show();
+        } else if (mode === 'custom') {
+            $('#custom-colors-field').show();
+            generateCustomPronounColorInputs();
+        }
     }
     
     updatePronounColors();

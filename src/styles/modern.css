@@ -101,7 +101,6 @@ div.card:nth-child(1) > p:nth-child(1) {
 
 /* Section Styles */
 section {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px 24px;
 }
@@ -295,6 +294,7 @@ button:active::after {
   margin-bottom: 20px;
   padding: 15px;
   overflow-y: auto;
+  width: 90%;
 }
 
 /* Result Section */
