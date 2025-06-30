@@ -117,6 +117,41 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAnimations();
     setupFormTransition();
     setupThemeToggle();
+    generateCustomPronounColorInputs();
+
+    Coloris({
+      el: '.coloris',
+      swatches: [
+        '#264653',
+        '#2a9d8f',
+        '#e9c46a',
+        '#f4a261',
+        '#e76f51',
+        '#d62828',
+        '#023e8a',
+        '#0077b6',
+        '#0096c7',
+        '#00b4d8',
+        '#48cae4'
+      ]
+    });
+
+    /** Instances **/
+
+    // Extract unique colors from pronoun defaults
+    const pronounColors = [
+      "#4facfe", "#00f2fe", "#ff9a9e", "#fecfef", "#a8edea", "#fed6e3",
+      "#fee140", "#a8caba", "#8a74ae", "#667eea", "#9f5edf", "#ffeef1",
+      "#f093fb", "#7cc2ff", "#43e97b", "#38f9d7", "#fa709a", "#9d64d6",
+      "#f5576c"
+    ];
+
+    Coloris.setInstance('.instance1', {
+      theme: 'pill',
+      themeMode: 'dark',
+      alpha: false,
+      swatches: pronounColors
+    });
     
     // Initial application of styles
     applyStyles("size", sizes[2]);
@@ -885,8 +920,8 @@ const $disableYTPlay = $('input[name="disable_ytplay"]');
 const $disableYTStop = $('input[name="disable_ytstop"]');
 const $disableIMG = $('input[name="disable_img"]');
 const $pronounColorMode = $('select[name="pronoun_color_mode"]');
-const $pronounColor1 = $('input[name="pronoun_color1"]');
-const $pronounColor2 = $('input[name="pronoun_color2"]');
+const $pronounColor1 = $('input[name="pronoun_single_color1"]');
+const $pronounColor2 = $('input[name="pronoun_single_color2"]');
 
 $fade_bool.change(fadeOption);
 $size.change(sizeUpdate);
@@ -918,8 +953,6 @@ $pronounColorMode.change(pronounColorModeUpdate);
 $pronounColor1.change(updatePronounColors);
 $pronounColor2.change(updatePronounColors);
 $pronounColorMode.change(pronounColorModeUpdate);
-$pronounColor1.change(updatePronounColors);
-$pronounColor2.change(updatePronounColors);
 $pronouns.change(pronounsUpdate);
 
 // Pronoun color customization functions
@@ -989,7 +1022,7 @@ function pronounColorModeUpdate(event) {
             $('#single-gradient-field').show();
         } else if (mode === 'custom') {
             $('#custom-colors-field').show();
-            generateCustomPronounColorInputs();
+            // generateCustomPronounColorInputs();
         }
     }
     
@@ -1015,21 +1048,62 @@ function generateCustomPronounColorInputs() {
     ];
     
     const container = $('#pronoun-color-inputs');
+    const singleContainer = $('#single-gradient-field');
     container.empty();
     
     pronounTypes.forEach(pronoun => {
         const html = `
             <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 8px; font-size: 16px;">
-                <span style="width: 140px; text-align: right;">${pronoun.display}:</span>
-                <input type="color" name="pronoun_${pronoun.name}_color1" value="${pronoun.default1}" style="width: 160px; height: 25px;" />
-                <input type="color" name="pronoun_${pronoun.name}_color2" value="${pronoun.default2}" style="width: 160px; height: 25px;" />
+                <div class="pronoun-label" style="width: 140px; text-align: center; cursor: pointer;" data-pronoun="${pronoun.name}" data-default1="${pronoun.default1}" data-default2="${pronoun.default2}" title="Click to reset to default colors">
+                    <span class="pronoun ${pronoun.name}" style="padding: 0.2em 0.5em; border-radius: 0.8em; color: black; font-size:16px;">${pronoun.display}</span>
+                </div>
+                <div class="color-picker square">
+                    <input type="text" name="pronoun_${pronoun.name}_color1" class="coloris instance1" value="${pronoun.default1}" style="height: 25px;"/>
+                </div>
+                <div class="color-picker square">
+                    <input type="text" name="pronoun_${pronoun.name}_color2" class="coloris instance1" value="${pronoun.default2}" style="height: 25px;"/>
+                </div>
             </div>
         `;
         container.append(html);
     });
     
+    // Add click handler for pronoun labels to reset colors
+    container.find('.pronoun-label').on('click', function() {
+        console.log("Resetting pronoun colors for " + $(this).data('pronoun'));
+        const pronounName = $(this).data('pronoun');
+        const default1 = $(this).data('default1');
+        const default2 = $(this).data('default2');
+        
+        $(`input[name="pronoun_${pronounName}_color1"]`).val(default1);
+        $(`input[name="pronoun_${pronounName}_color2"]`).val(default2);
+
+        document.querySelector(`input[name="pronoun_${pronounName}_color1"]`).dispatchEvent(new Event('input', { bubbles: true }));
+        document.querySelector(`input[name="pronoun_${pronounName}_color2"]`).dispatchEvent(new Event('input', { bubbles: true }));
+        
+        updatePronounColors();
+    });
+
+    // Add click handler for single gradient label to reset colors
+    singleContainer.find('.pronoun-label').on('click', function() {
+        console.log("Resetting single gradient colors");
+        const default1 = $(this).data('default1');
+        const default2 = $(this).data('default2');
+        
+        $pronounColor1.val(default1);
+        $pronounColor2.val(default2);
+
+        document.querySelector(`input[name="pronoun_single_color1"]`).dispatchEvent(new Event('input', { bubbles: true }));
+        document.querySelector(`input[name="pronoun_single_color2"]`).dispatchEvent(new Event('input', { bubbles: true }));
+        
+        updatePronounColors();
+    });
+
     // Add event listeners for the new color inputs
-    container.find('input[type="color"]').on('change', updatePronounColors);
+    document.addEventListener('coloris:pick', event => {
+        updatePronounColors();
+    });
+    // container.find('input[type="text"]').on('change', updatePronounColors);
 }
 
 function updatePronounColors() {

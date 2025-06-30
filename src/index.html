@@ -20,6 +20,8 @@
         rel="stylesheet" />
     <link rel="stylesheet" href="styles/style.css?v=1" />
     <link rel="stylesheet" href="styles/modern.css?v=1" />
+    <link rel="stylesheet" href="styles/coloris.min.css"/>
+    <script src="styles/coloris.min.js"></script>
     <script src="jquery.min.js"></script>
     <script src="settings.js" defer></script>
     <script src="utils.js" defer></script>
@@ -149,17 +151,88 @@
             border-radius: 8px;
             padding: 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
         }
 
-        #pronoun-color-inputs input[type="color"] {
-            border: none;
-            border-radius: 4px;
+        #pronoun-color-inputs input[type="text"] {
             cursor: pointer;
             transition: transform 0.2s ease;
+            text-transform: uppercase;
         }
 
-        #pronoun-color-inputs input[type="color"]:hover {
-            transform: scale(1.1);
+        .square .clr-field button {
+            width: 25%;
+            max-width: 100px;
+            min-width: 22px;
+            height: 22px;
+            left: 10px;
+            right: auto;
+            border-radius: 5px;
+            background: transparent;
+        }
+
+        .square .clr-field input {
+            padding-left: 36px;
+        }
+
+        .square, .clr-field {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .pronoun-label {
+            min-width: 120px;
+        }
+
+        div.pronoun-label > .pronoun {
+            margin-left: 0px;
+        }
+
+        .clr-field button::after, .clr-swatches button::after {
+            width: 400% !important;
+            height: 400% !important;
+            opacity: 1;
+        }
+
+        .clr-dark input.clr-color, .square .clr-field input {
+            text-transform: uppercase;
+        }
+
+        @media only screen and (max-width: 768px) {
+            header {
+                min-height: 140px;
+                padding: 0px;
+            }
+
+            header img {
+                margin-bottom: 0px;
+            }
+
+            header div {
+                margin: 0;
+            }
+        }
+
+        @media only screen and (max-width: 358px) {
+            #donation {
+                padding-bottom: 250px;
+            }
+        }
+
+        @media only screen and (min-width: 359px) and (max-width: 401px) {
+            #donation {
+                padding-bottom: 200px;
+            }
+        }
+
+        @media only screen and (min-width: 402px) and (max-width: 783px) {
+            #donation {
+                padding-bottom: 170px;
+            }
+        }
+
+        #custom-colors-field {
+            display: flex;
         }
     </style>
 </head>
@@ -406,18 +479,23 @@
                                 <select name="pronoun_color_mode" class="standardized-width" disabled>
                                     <option value="default" selected>Default Gradients</option>
                                     <option value="single">Single Custom Gradient</option>
-                                    <option value="custom">Custom Per Type</option>
+                                    <option value="custom">Custom Per Pronoun</option>
                                 </select>
                             </div>
                             <div class="form-field pronoun-color-field" id="single-gradient-field" style="display: none;">
-                                <label for="pronoun_single_gradient"></label>
+                                <div class="pronoun-label" style="text-align: center; cursor: pointer;" data-pronoun="single" data-default1="#a8edea" data-default2="#fed6e3" title="Click to reset to default colors">
+                                    <span class="pronoun theythem" style="padding: 0.2em 0.5em; border-radius: 0.8em; color: black; font-size:16px;">They/Them</span>
+                                </div>
                                 <div style="display: flex; gap: 5px;">
-                                    <input type="color" name="pronoun_color1" value="#a8edea" style="width: 48%;" />
-                                    <input type="color" name="pronoun_color2" value="#fed6e3" style="width: 48%;" />
+                                    <div class="color-picker square">
+                                        <input type="text" name="pronoun_single_color1" class="coloris instance1" value="#a8edea"/>
+                                    </div>
+                                     <div class="color-picker square">
+                                        <input type="text" name="pronoun_single_color2" class="coloris instance1" value="#fed6e3"/>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-field pronoun-color-field" id="custom-colors-field" style="display: none;">
-                                <label></label>
                                 <div id="pronoun-color-inputs" style="max-height: 200px; overflow-y: auto;">
                                     <!-- Individual pronoun color inputs will be generated here -->
                                 </div>

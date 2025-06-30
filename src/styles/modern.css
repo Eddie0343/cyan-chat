@@ -259,7 +259,7 @@ button::after {
   width: 0;
   height: 0;
   background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
+  border-radius: var(--border-radius);
   transform: translate(-50%, -50%);
   opacity: 0;
   transition: width 0.5s, height 0.5s, opacity 0.5s;
@@ -268,8 +268,8 @@ button::after {
 input[type="submit"]:active::after,
 input[type="button"]:active::after,
 button:active::after {
-  width: 300px;
-  height: 300px;
+  width: 100%;
+  height: 100%;
   opacity: 1;
   transition: 0s;
 }
@@ -553,7 +553,6 @@ a:hover {
   border-radius: var(--border-radius);
   padding-bottom: 132px;
   padding-top: 12px;
-  width: 1050px;
   text-align: center;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   position: relative;
