@@ -131,6 +131,36 @@
             font-size: 20px;
             margin: 0;
         }
+
+        /* Pronoun color customization styles */
+        .pronoun-color-field {
+            margin-top: 10px;
+        }
+
+        .pronoun-color-field label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        #pronoun-color-inputs {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #pronoun-color-inputs input[type="color"] {
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        #pronoun-color-inputs input[type="color"]:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 
@@ -370,6 +400,27 @@
                             <div class="form-field message-image-field">
                                 <label for="message_image">SMS Image URLs</label>
                                 <input type="text" name="message_image" placeholder="URLs for SMS corner images comma separated (optional)" class="standardized-width" />
+                            </div>
+                            <div class="form-field">
+                                <label for="pronoun_color_mode" data-tooltip="Choose how to color pronoun badges">Pronoun Colors</label>
+                                <select name="pronoun_color_mode" class="standardized-width">
+                                    <option value="default" selected>Default Gradients</option>
+                                    <option value="single">Single Custom Gradient</option>
+                                    <option value="custom">Custom Per Type</option>
+                                </select>
+                            </div>
+                            <div class="form-field pronoun-color-field" id="single-gradient-field" style="display: none;">
+                                <label for="pronoun_single_gradient"></label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="color" name="pronoun_color1" value="#a8edea" style="width: 48%;" />
+                                    <input type="color" name="pronoun_color2" value="#fed6e3" style="width: 48%;" />
+                                </div>
+                            </div>
+                            <div class="form-field pronoun-color-field" id="custom-colors-field" style="display: none;">
+                                <label></label>
+                                <div id="pronoun-color-inputs" style="max-height: 200px; overflow-y: auto;">
+                                    <!-- Individual pronoun color inputs will be generated here -->
+                                </div>
                             </div>
                         </div>
 

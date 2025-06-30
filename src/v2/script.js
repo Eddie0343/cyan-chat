@@ -152,6 +152,29 @@ Chat = {
       "pronouns" in $.QueryString
         ? $.QueryString.pronouns.toLowerCase() === "true"
         : false,
+    pronounColorMode:
+      "pronoun_color_mode" in $.QueryString
+        ? $.QueryString.pronoun_color_mode
+        : "default",
+    pronounSingleColor1:
+      "pronoun_single_color1" in $.QueryString
+        ? $.QueryString.pronoun_single_color1
+        : "#a8edea",
+    pronounSingleColor2:
+      "pronoun_single_color2" in $.QueryString
+        ? $.QueryString.pronoun_single_color2
+        : "#fed6e3",
+    pronounCustomColors:
+      "pronoun_custom_colors" in $.QueryString
+        ? (() => {
+            try {
+              return JSON.parse(decodeURIComponent($.QueryString.pronoun_custom_colors));
+            } catch (e) {
+              console.warn("Failed to parse custom pronoun colors:", e);
+              return {};
+            }
+          })()
+        : {},
     pronouns: {},
     pronounTypes: {},
   },
@@ -305,9 +328,52 @@ Chat = {
         res.forEach((pronoun) => {
           Chat.info.pronounTypes[pronoun.name] = pronoun.display;
         });
+        // Apply custom pronoun colors after types are loaded
+        Chat.applyPronounColors();
       }).fail(function() {
         console.warn("Failed to load pronoun types");
       });
+    } else {
+      // Types already loaded, just apply colors
+      Chat.applyPronounColors();
+    }
+  },
+
+  applyPronounColors: function() {
+    if (!Chat.info.showPronouns || Chat.info.pronounColorMode === "default") {
+      return;
+    }
+    
+    let customCSS = '';
+    
+    if (Chat.info.pronounColorMode === "single") {
+      customCSS = `
+        .pronoun {
+          background: linear-gradient(135deg, ${Chat.info.pronounSingleColor1} 0%, ${Chat.info.pronounSingleColor2} 100%) !important;
+        }
+      `;
+    } else if (Chat.info.pronounColorMode === "custom" && Object.keys(Chat.info.pronounCustomColors).length > 0) {
+      Object.keys(Chat.info.pronounCustomColors).forEach(type => {
+        const colors = Chat.info.pronounCustomColors[type];
+        if (colors && colors.color1 && colors.color2) {
+          customCSS += `
+            .pronoun.${type} {
+              background: linear-gradient(135deg, ${colors.color1} 0%, ${colors.color2} 100%) !important;
+            }
+          `;
+        }
+      });
+    }
+    
+    if (customCSS) {
+      // Create or update style element for custom pronoun colors
+      let styleElement = document.getElementById('custom-pronoun-colors');
+      if (!styleElement) {
+        styleElement = document.createElement('style');
+        styleElement.id = 'custom-pronoun-colors';
+        document.head.appendChild(styleElement);
+      }
+      styleElement.textContent = customCSS;
     }
   },
 
@@ -1671,7 +1737,7 @@ Chat = {
               let mentionShadow = "";
               if (Chat.info.stroke) {
                 if (Chat.info.stroke === 1) {
-                  mentionShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
+                  mentionShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)";
                 } else if (Chat.info.stroke === 2) {
                   mentionShadow = " drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px) drop-shadow(rgb(0, 0, 0) 0px 0px 0.5px)"
                 }

@@ -755,6 +755,10 @@ function generateURL(event) {
         message_image: $sms.is(":checked") ? $messageImage.val() : false,
         big_emotes: $bigEmotes.is(":checked"),
         off_commands: disabledCommands.join(","),
+        pronoun_color_mode: $pronounColorMode.val() !== "default" ? $pronounColorMode.val() : false,
+        pronoun_single_color1: $pronounColorMode.val() === "single" ? $pronounColor1.val() : false,
+        pronoun_single_color2: $pronounColorMode.val() === "single" ? $pronounColor2.val() : false,
+        pronoun_custom_colors: $pronounColorMode.val() === "custom" ? getPronounCustomColors() : false,
     };
 
     const params = encodeQueryData(data);
@@ -851,6 +855,9 @@ const $disableRickroll = $('input[name="disable_rickroll"]');
 const $disableYTPlay = $('input[name="disable_ytplay"]');
 const $disableYTStop = $('input[name="disable_ytstop"]');
 const $disableIMG = $('input[name="disable_img"]');
+const $pronounColorMode = $('select[name="pronoun_color_mode"]');
+const $pronounColor1 = $('input[name="pronoun_color1"]');
+const $pronounColor2 = $('input[name="pronoun_color2"]');
 
 $fade_bool.change(fadeOption);
 $size.change(sizeUpdate);
@@ -878,3 +885,116 @@ $disableRickroll.change(commandsUpdate);
 $disableYTPlay.change(commandsUpdate);
 $disableYTStop.change(commandsUpdate);
 $disableIMG.change(commandsUpdate);
+$pronounColorMode.change(pronounColorModeUpdate);
+$pronounColor1.change(updatePronounColors);
+$pronounColor2.change(updatePronounColors);
+$pronounColorMode.change(pronounColorModeUpdate);
+$pronounColor1.change(updatePronounColors);
+$pronounColor2.change(updatePronounColors);
+
+// Pronoun color customization functions
+function pronounColorModeUpdate(event) {
+    const mode = $pronounColorMode.val();
+    
+    // Hide all pronoun color fields first
+    $('.pronoun-color-field').hide();
+    
+    if (mode === 'single') {
+        $('#single-gradient-field').show();
+    } else if (mode === 'custom') {
+        $('#custom-colors-field').show();
+        generateCustomPronounColorInputs();
+    }
+    
+    updatePronounColors();
+}
+
+function generateCustomPronounColorInputs() {
+    const pronounTypes = [
+        { display: "He/Him", name: "hehim", default1: "#4facfe", default2: "#00f2fe" },
+        { display: "She/Her", name: "sheher", default1: "#ff9a9e", default2: "#fecfef" },
+        { display: "They/Them", name: "theythem", default1: "#a8edea", default2: "#fed6e3" },
+        { display: "She/They", name: "shethem", default1: "#ff9a9e", default2: "#fee140" },
+        { display: "He/They", name: "hethem", default1: "#4facfe", default2: "#fed6e3" },
+        { display: "He/She", name: "heshe", default1: "#4facfe", default2: "#ff9a9e" },
+        { display: "Xe/Xem", name: "xexem", default1: "#a8caba", default2: "#8a74ae" },
+        { display: "Fae/Faer", name: "faefaer", default1: "#667eea", default2: "#9f5edf" },
+        { display: "Ve/Ver", name: "vever", default1: "#ffeef1", default2: "#f093fb" },
+        { display: "Ae/Aer", name: "aeaer", default1: "#7cc2ff", default2: "#00f2fe" },
+        { display: "Zie/Hir", name: "ziehir", default1: "#43e97b", default2: "#38f9d7" },
+        { display: "Per/Per", name: "perper", default1: "#fa709a", default2: "#fee140" },
+        { display: "E/Em", name: "eem", default1: "#667eea", default2: "#9d64d6" },
+        { display: "It/Its", name: "itits", default1: "#f093fb", default2: "#f5576c" }
+    ];
+    
+    const container = $('#pronoun-color-inputs');
+    container.empty();
+    
+    pronounTypes.forEach(pronoun => {
+        const html = `
+            <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 8px; font-size: 16px;">
+                <span style="width: 140px; text-align: right;">${pronoun.display}:</span>
+                <input type="color" name="pronoun_${pronoun.name}_color1" value="${pronoun.default1}" style="width: 160px; height: 25px;" />
+                <input type="color" name="pronoun_${pronoun.name}_color2" value="${pronoun.default2}" style="width: 160px; height: 25px;" />
+            </div>
+        `;
+        container.append(html);
+    });
+    
+    // Add event listeners for the new color inputs
+    container.find('input[type="color"]').on('change', updatePronounColors);
+}
+
+function updatePronounColors() {
+    const mode = $pronounColorMode.val();
+    let customCSS = '';
+    
+    if (mode === 'single') {
+        const color1 = $pronounColor1.val();
+        const color2 = $pronounColor2.val();
+        customCSS = `
+            .pronoun {
+                background: linear-gradient(135deg, ${color1} 0%, ${color2} 100%) !important;
+            }
+        `;
+    } else if (mode === 'custom') {
+        const pronounTypes = ['hehim', 'sheher', 'theythem', 'shethem', 'hethem', 'heshe', 'xexem', 'faefaer', 'vever', 'aeaer', 'ziehir', 'perper', 'eem', 'itits'];
+        
+        pronounTypes.forEach(type => {
+            const color1Input = $(`input[name="pronoun_${type}_color1"]`);
+            const color2Input = $(`input[name="pronoun_${type}_color2"]`);
+            
+            if (color1Input.length && color2Input.length) {
+                const color1 = color1Input.val();
+                const color2 = color2Input.val();
+                customCSS += `
+                    .pronoun.${type} {
+                        background: linear-gradient(135deg, ${color1} 0%, ${color2} 100%) !important;
+                    }
+                `;
+            }
+        });
+    }
+    
+    // Apply the custom CSS
+    applyStyles('pronoun-colors', customCSS);
+}
+
+function getPronounCustomColors() {
+    const pronounTypes = ['hehim', 'sheher', 'theythem', 'shethem', 'hethem', 'heshe', 'xexem', 'faefaer', 'vever', 'aeaer', 'ziehir', 'perper', 'eem', 'itits'];
+    const colors = {};
+    
+    pronounTypes.forEach(type => {
+        const color1Input = $(`input[name="pronoun_${type}_color1"]`);
+        const color2Input = $(`input[name="pronoun_${type}_color2"]`);
+        
+        if (color1Input.length && color2Input.length) {
+            colors[type] = {
+                color1: color1Input.val(),
+                color2: color2Input.val()
+            };
+        }
+    });
+    
+    return JSON.stringify(colors);
+}
