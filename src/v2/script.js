@@ -2077,66 +2077,71 @@ Chat = {
                 }
               }
               // #endregion Video
-
+              
               // #region TTS
-              if (
-                message.params[1].toLowerCase().startsWith("!chat tts") || message.params[1].toLowerCase().startsWith("!chatis tts") &&
-                typeof message.tags.badges === "string"
-              ) {
-                if (Chat.info.disabledCommands.includes("tts")) return;
-                var flag = false;
-                message.tags.badges.split(",").forEach((badge) => {
-                  badge = badge.split("/");
-                  if (badge[0] === "moderator" || badge[0] === "broadcaster") {
-                    flag = true;
-                    return;
+              const ignoreList = new Set(["streamelements", "nightbot", "moobot"]);
+
+              if (typeof message.params[1] === "string") {
+                const text = message.params[1].trim();
+                const nick = message.tags["display-name"]?.toLowerCase() || message.prefix?.split("!")[0].toLowerCase();
+              
+                // Handle ignore/unignore commands
+                if (text.toLowerCase().startsWith("!ignore ")) {
+                  const userToIgnore = text.split(" ")[1]?.toLowerCase();
+                  if (userToIgnore) {
+                    ignoreList.add(userToIgnore);
+                    queueTTS(`${userToIgnore} added to ignore list.`, "Brian");
                   }
-                });
-                if (nick == "johnnycyan") flag = true
-
-                if (flag) {
-                  const commandPrefix = message.params[1].toLowerCase().startsWith("!chat tts") ? "!chat tts" : "!chatis tts";
-                  var fullCommand = message.params[1].slice(commandPrefix.length).trim();
-
-                  const schema = {
-                    v: String,
-                    voice: String,
-                    s: String
-                  };
-
-                  const { flags, rest } = parseFlags(fullCommand, schema);
-
-                  var text = rest;
-                  var voice = "Brian"; // Default voice
-
-                  const allowedVoices = [
-                    "Brian", "Ivy", "Justin", "Russell", "Nicole", "Emma", "Amy", "Joanna",
-                    "Salli", "Kimberly", "Kendra", "Joey", "Mizuki", "Chantal", "Mathieu",
-                    "Maxim", "Hans", "Raveena", "Tatyana"
-                  ];
-
-                  if (Chat.info.voice) {
-                    normalizedVoiceConfig = Chat.info.voice.charAt(0).toUpperCase() + Chat.info.voice.slice(1).toLowerCase();
-                    // console.log(normalizedVoiceConfig);
-                    if (allowedVoices.includes(normalizedVoiceConfig)) {
-                      voice = normalizedVoiceConfig;
-                    }
-                  }
-
-                  // Check for voice in flags
-                  const potentialVoice = flags.v || flags.voice || flags.s;
-                  if (potentialVoice) {
-                    const normalizedVoice = potentialVoice.charAt(0).toUpperCase() + potentialVoice.slice(1).toLowerCase();
-                    if (allowedVoices.includes(normalizedVoice)) {
-                      voice = normalizedVoice;
-                    }
-                  }
-
-                  // Use the queue system instead of direct playback
-                  queueTTS(text, voice);
-                  console.log(`Cyan Chat: Queued TTS Audio ... [Voice: ${voice}]`);
                   return;
                 }
+                if (text.toLowerCase().startsWith("!unignore ")) {
+                  const userToUnignore = text.split(" ")[1]?.toLowerCase();
+                  if (userToUnignore && ignoreList.has(userToUnignore)) {
+                    ignoreList.delete(userToUnignore);
+                    queueTTS(`${userToUnignore} removed from ignore list.`, "Brian");
+                  }
+                  return;
+                }
+              
+                // Skip ignored users
+                if (ignoreList.has(nick)) {
+                  console.log(`Cyan Chat: Skipped ignored user "${nick}"`);
+                  return;
+                }
+              
+                if (Chat.info.disabledCommands.includes("tts")) return;
+              
+                let voice = "Brian"; // Default voice
+              
+                const allowedVoices = [
+                  "Brian", "Ivy", "Justin", "Russell", "Nicole", "Emma", "Amy", "Joanna",
+                  "Salli", "Kimberly", "Kendra", "Joey", "Mizuki", "Chantal", "Mathieu",
+                  "Maxim", "Hans", "Raveena", "Tatyana"
+                ];
+              
+                if (Chat.info.voice) {
+                  const normalizedVoiceConfig = Chat.info.voice.charAt(0).toUpperCase() + Chat.info.voice.slice(1).toLowerCase();
+                  if (allowedVoices.includes(normalizedVoiceConfig)) {
+                    voice = normalizedVoiceConfig;
+                  }
+                }
+              
+                const { flags } = parseFlags(text, {
+                  v: String,
+                  voice: String,
+                  s: String
+                });
+              
+                const potentialVoice = flags.v || flags.voice || flags.s;
+                if (potentialVoice) {
+                  const normalizedVoice = potentialVoice.charAt(0).toUpperCase() + potentialVoice.slice(1).toLowerCase();
+                  if (allowedVoices.includes(normalizedVoice)) {
+                    voice = normalizedVoice;
+                  }
+                }
+              
+                queueTTS(text, voice);
+                console.log(`Cyan Chat: Queued TTS Audio from "${nick}" ... [Voice: ${voice}]`);
               }
               // #endregion TTS
 
